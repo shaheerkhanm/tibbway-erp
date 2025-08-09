@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
   CalendarIcon,
   ChevronDown,
@@ -72,9 +73,11 @@ export default function PatientsPage() {
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Patients</h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Patient
+        <Button asChild>
+          <Link href="/patients/add">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Patient
+          </Link>
         </Button>
       </header>
 
