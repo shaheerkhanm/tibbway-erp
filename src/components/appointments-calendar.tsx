@@ -1,11 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { addDays, format, isSameDay } from "date-fns"
+import { isSameDay, format, parseISO } from "date-fns"
 import { Calendar as CalendarIcon, PlusCircle } from "lucide-react"
 
 import type { Appointment } from "@/lib/types"
-import { mockAppointments } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -27,20 +26,49 @@ import {
 } from "@/components/ui/dialog"
 import { AppointmentForm } from "./appointment-form"
 import { ScrollArea } from "./ui/scroll-area"
+import { Skeleton } from "./ui/skeleton"
 
 export function AppointmentsCalendar() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
-  const [appointments, setAppointments] = React.useState<Appointment[]>(mockAppointments)
+  const [appointments, setAppointments] = React.useState<Appointment[]>([])
+  const [loading, setLoading] = React.useState(true);
   const [isFormOpen, setIsFormOpen] = React.useState(false)
+
+  const fetchAppointments = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/appointments');
+      const data = await response.json();
+      // Ensure appointmentDate is a Date object
+      const formattedData = data.map((appt: any) => ({
+        ...appt,
+        appointmentDate: parseISO(appt.appointmentDate)
+      }));
+      setAppointments(formattedData);
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
 
   const selectedDayAppointments = React.useMemo(() => {
     return date
       ? appointments.filter((appt) => isSameDay(appt.appointmentDate, date))
       : []
   }, [date, appointments])
+  
+  const appointmentDates = React.useMemo(() => {
+    return appointments.map(appt => appt.appointmentDate);
+  }, [appointments]);
 
   const handleFormSuccess = () => {
-    // Here you would refetch appointments
+    fetchAppointments();
     setIsFormOpen(false)
   }
 
@@ -72,23 +100,25 @@ export function AppointmentsCalendar() {
                 </DialogContent>
             </Dialog>
         </CardHeader>
-        <CardContent className="p-0">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            className="flex justify-center"
-            modifiers={{
-              hasAppointment: appointments.map(appt => appt.appointmentDate)
-            }}
-            modifiersStyles={{
-              hasAppointment: { 
-                fontWeight: 'bold', 
-                border: '2px solid hsl(var(--primary))',
-                borderRadius: 'var(--radius)',
-              }
-            }}
-          />
+        <CardContent className="p-0 flex justify-center">
+            {loading ? <Skeleton className="w-[80%] h-[350px]" /> :
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="flex justify-center"
+                    modifiers={{
+                    hasAppointment: appointmentDates
+                    }}
+                    modifiersStyles={{
+                    hasAppointment: { 
+                        fontWeight: 'bold', 
+                        border: '2px solid hsl(var(--primary))',
+                        borderRadius: 'var(--radius)',
+                    }
+                    }}
+                />
+            }
         </CardContent>
       </Card>
       <Card>
@@ -103,9 +133,14 @@ export function AppointmentsCalendar() {
         <CardContent>
           <ScrollArea className="h-96">
             <div className="space-y-4">
-              {selectedDayAppointments.length > 0 ? (
+              {loading ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-28 w-full rounded-lg" />
+                    <Skeleton className="h-28 w-full rounded-lg" />
+                </div>
+              ) : selectedDayAppointments.length > 0 ? (
                 selectedDayAppointments.map((appt) => (
-                  <div key={appt.id} className="p-4 rounded-lg border bg-card space-y-2">
+                  <div key={appt._id} className="p-4 rounded-lg border bg-card space-y-2">
                     <div className="font-semibold">{appt.patientName}</div>
                     <div className="text-sm text-muted-foreground">
                       with {appt.doctorName} at {appt.hospitalName}

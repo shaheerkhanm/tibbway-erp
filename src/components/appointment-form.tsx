@@ -29,7 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { mockPatients, mockDoctors, mockHospitals } from "@/lib/mock-data"
+import { Doctor, Hospital, Patient } from "@/lib/types"
 
 const appointmentFormSchema = z.object({
   patientId: z.string().min(1, "Patient is required."),
@@ -49,6 +49,33 @@ export function AppointmentForm({
   onSuccess: () => void
 }) {
   const { toast } = useToast()
+  const [patients, setPatients] = React.useState<Patient[]>([])
+  const [doctors, setDoctors] = React.useState<Doctor[]>([])
+  const [hospitals, setHospitals] = React.useState<Hospital[]>([])
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const [patientsRes, doctorsRes, hospitalsRes] = await Promise.all([
+                fetch('/api/patients'),
+                fetch('/api/doctors'),
+                fetch('/api/hospitals'),
+            ]);
+            setPatients(await patientsRes.json());
+            setDoctors(await doctorsRes.json());
+            setHospitals(await hospitalsRes.json());
+        } catch (error) {
+            console.error("Failed to fetch data for form", error);
+            toast({
+                title: "Error",
+                description: "Failed to load data for the form. Please try again.",
+                variant: "destructive"
+            })
+        }
+    }
+    fetchData();
+  }, [toast])
+
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -57,14 +84,43 @@ export function AppointmentForm({
     },
   })
 
-  function onSubmit(data: AppointmentFormValues) {
-    // In a real app, you would send this data to your server.
-    console.log(data)
-    toast({
-      title: "Appointment Scheduled!",
-      description: "The new appointment has been successfully added to the calendar.",
-    })
-    onSuccess()
+  async function onSubmit(data: AppointmentFormValues) {
+    const patient = patients.find(p => p._id === data.patientId);
+    const doctor = doctors.find(d => d._id === data.doctorId);
+    const hospital = hospitals.find(h => h._id === data.hospitalId);
+
+    if (!patient || !doctor || !hospital) {
+        toast({ title: "Error", description: "Invalid selection.", variant: "destructive" });
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...data,
+                patientName: patient.name,
+                doctorName: doctor.name,
+                hospitalName: hospital.name,
+                status: 'Scheduled',
+            }),
+        });
+        if (!response.ok) throw new Error("Failed to create appointment");
+        
+        toast({
+            title: "Appointment Scheduled!",
+            description: "The new appointment has been successfully added to the calendar.",
+        })
+        onSuccess()
+    } catch (error) {
+        console.error(error);
+        toast({
+            title: "Error",
+            description: "Could not schedule the appointment. Please try again.",
+            variant: "destructive"
+        })
+    }
   }
 
   return (
@@ -84,8 +140,8 @@ export function AppointmentForm({
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    {mockPatients.map(patient => (
-                        <SelectItem key={patient.id} value={patient.id}>
+                    {patients.map(patient => (
+                        <SelectItem key={patient._id} value={patient._id}>
                         {patient.name}
                         </SelectItem>
                     ))}
@@ -108,8 +164,8 @@ export function AppointmentForm({
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    {mockDoctors.map(doctor => (
-                        <SelectItem key={doctor.id} value={doctor.id}>
+                    {doctors.map(doctor => (
+                        <SelectItem key={doctor._id} value={doctor._id}>
                         {doctor.name}
                         </SelectItem>
                     ))}
@@ -132,8 +188,8 @@ export function AppointmentForm({
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    {mockHospitals.map(hospital => (
-                        <SelectItem key={hospital.id} value={hospital.id}>
+                    {hospitals.map(hospital => (
+                        <SelectItem key={hospital._id} value={hospital._id}>
                         {hospital.name}
                         </SelectItem>
                     ))}
@@ -172,7 +228,7 @@ export function AppointmentForm({
                         <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(date) => field.onChange(date)}
                             disabled={(date) =>
                             date < new Date(new Date().setDate(new Date().getDate() - 1))
                             }
@@ -202,9 +258,13 @@ export function AppointmentForm({
             </FormItem>
           )}
         />
-        <Button type="submit">
-          <PlusCircle className="mr-2" />
-          Schedule Appointment
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Scheduling..." : (
+            <>
+                <PlusCircle className="mr-2" />
+                Schedule Appointment
+            </>
+          )}
         </Button>
       </form>
     </Form>

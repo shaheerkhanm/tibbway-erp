@@ -19,13 +19,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { mockDoctors } from "@/lib/mock-data"
 import type { Doctor } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DoctorsPage() {
-  const [doctors] = React.useState<Doctor[]>(mockDoctors)
+  const [doctors, setDoctors] = React.useState<Doctor[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch("/api/doctors")
+        const data = await response.json()
+        setDoctors(data)
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchDoctors()
+  }, [])
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,26 +54,52 @@ export default function DoctorsPage() {
       </header>
       <Card>
         <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Specialty</TableHead>
-                  <TableHead>Hospital</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {doctors.map((doctor) => (
-                  <TableRow key={doctor.id}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Specialty</TableHead>
+                <TableHead>Hospital</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-9 w-9 rounded-full" />
+                        <Skeleton className="h-4 w-[150px]" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[100px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[150px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[200px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-8" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                doctors.map((doctor) => (
+                  <TableRow key={doctor._id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="hidden h-9 w-9 sm:flex">
                           <AvatarImage src={doctor.imageUrl} alt={doctor.name} data-ai-hint="doctor person" />
-                          <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback>
+                            {doctor.name.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="font-medium">{doctor.name}</div>
                       </div>
@@ -68,7 +110,11 @@ export default function DoctorsPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Toggle menu</span>
                           </Button>
@@ -84,9 +130,10 @@ export default function DoctorsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

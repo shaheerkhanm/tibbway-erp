@@ -20,13 +20,29 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { mockHospitals } from "@/lib/mock-data"
 import type { Hospital } from "@/lib/types"
 import Image from "next/image"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function HospitalsPage() {
-  const [hospitals] = React.useState<Hospital[]>(mockHospitals)
+  const [hospitals, setHospitals] = React.useState<Hospital[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const response = await fetch('/api/hospitals');
+        const data = await response.json();
+        setHospitals(data);
+      } catch (error) {
+        console.error("Failed to fetch hospitals", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHospitals();
+  }, [])
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,23 +55,41 @@ export default function HospitalsPage() {
       </header>
       <Card>
         <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="hidden w-[100px] sm:table-cell">
-                    <span className="sr-only">Image</span>
-                  </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Specialties</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {hospitals.map((hospital) => (
-                  <TableRow key={hospital.id}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="hidden w-[100px] sm:table-cell">
+                  <span className="sr-only">Image</span>
+                </TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Specialties</TableHead>
+                <TableHead>
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                 Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell className="hidden sm:table-cell">
+                            <Skeleton className="h-16 w-16 rounded-md" />
+                        </TableCell>
+                        <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                        <TableCell>
+                            <div className="flex gap-1">
+                                <Skeleton className="h-6 w-20 rounded-full" />
+                                <Skeleton className="h-6 w-20 rounded-full" />
+                            </div>
+                        </TableCell>
+                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                    </TableRow>
+                 ))
+              ) : (
+                hospitals.map((hospital) => (
+                  <TableRow key={hospital._id}>
                     <TableCell className="hidden sm:table-cell">
                       <Image
                         alt={hospital.name}
@@ -66,19 +100,27 @@ export default function HospitalsPage() {
                         data-ai-hint="hospital building"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{hospital.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {hospital.name}
+                    </TableCell>
                     <TableCell>{hospital.location}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         {hospital.specialties.map((spec) => (
-                          <Badge key={spec} variant="secondary">{spec}</Badge>
+                          <Badge key={spec} variant="secondary">
+                            {spec}
+                          </Badge>
                         ))}
                       </div>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Toggle menu</span>
                           </Button>
@@ -94,9 +136,10 @@ export default function HospitalsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
