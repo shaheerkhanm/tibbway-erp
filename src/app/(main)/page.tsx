@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  BarChart,
+  BarChart as BarChartIcon,
   DollarSign,
   Globe,
   Users,
@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { kpiData } from "@/lib/mock-data"
 
 const chartConfig = {
