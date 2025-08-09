@@ -38,8 +38,12 @@ export function AppointmentsCalendar() {
     setLoading(true);
     try {
       const response = await fetch('/api/appointments');
-      const data = await response.json();
-      // Ensure appointmentDate is a Date object
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : [];
+      
       const formattedData = data.map((appt: any) => ({
         ...appt,
         appointmentDate: parseISO(appt.appointmentDate)
