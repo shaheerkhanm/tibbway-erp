@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { format } from "date-fns"
-import { CalendarIcon, PlusCircle } from "lucide-react"
+import { format, parseISO } from "date-fns"
+import { CalendarIcon, PlusCircle, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,7 +29,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { Doctor, Hospital } from "@/lib/types"
+import type { Doctor, Hospital, Patient } from "@/lib/types"
+import { Skeleton } from "./ui/skeleton"
 
 const patientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -45,11 +46,24 @@ const patientFormSchema = z.object({
 
 type PatientFormValues = z.infer<typeof patientFormSchema>
 
-export function PatientForm() {
+interface PatientFormProps {
+    patientId?: string;
+}
+
+export function PatientForm({ patientId }: PatientFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [doctors, setDoctors] = React.useState<Doctor[]>([])
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
+  const [loading, setLoading] = React.useState(true);
+  const isEditMode = !!patientId;
+
+  const form = useForm<PatientFormValues>({
+    resolver: zodResolver(patientFormSchema),
+    defaultValues: {
+      status: "Pending",
+    },
+  })
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +74,15 @@ export function PatientForm() {
             ]);
             setDoctors(await doctorsRes.json());
             setHospitals(await hospitalsRes.json());
+
+            if (isEditMode) {
+                const patientRes = await fetch(`/api/patients/${patientId}`);
+                const patientData: Patient = await patientRes.json();
+                form.reset({
+                    ...patientData,
+                    treatmentDate: parseISO(patientData.treatmentDate),
+                });
+            }
         } catch (error) {
             console.error("Failed to fetch data for form", error);
             toast({
@@ -67,26 +90,21 @@ export function PatientForm() {
                 description: "Failed to load data for the form. Please try again.",
                 variant: "destructive"
             })
+        } finally {
+            setLoading(false);
         }
     }
     fetchData();
-  }, [toast])
+  }, [patientId, isEditMode, form, toast])
 
-
-  const form = useForm<PatientFormValues>({
-    resolver: zodResolver(patientFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      country: "",
-      status: "Pending",
-    },
-  })
 
   async function onSubmit(data: PatientFormValues) {
+    const apiEndpoint = isEditMode ? `/api/patients/${patientId}` : '/api/patients';
+    const method = isEditMode ? 'PUT' : 'POST';
+
     try {
-        const response = await fetch('/api/patients', {
-            method: 'POST',
+        const response = await fetch(apiEndpoint, {
+            method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 ...data,
@@ -94,11 +112,11 @@ export function PatientForm() {
                 avatar: `https://placehold.co/100x100.png?text=${data.name.charAt(0)}`
             }),
         });
-        if (!response.ok) throw new Error("Failed to create patient");
+        if (!response.ok) throw new Error(`Failed to ${isEditMode ? 'update' : 'create'} patient`);
         
         toast({
-            title: "Patient Added!",
-            description: "The new patient has been successfully added.",
+            title: `Patient ${isEditMode ? 'Updated' : 'Added'}!`,
+            description: `The patient has been successfully ${isEditMode ? 'updated' : 'added'}.`,
         })
         router.push('/patients');
         router.refresh();
@@ -106,10 +124,27 @@ export function PatientForm() {
         console.error(error);
         toast({
             title: "Error",
-            description: "Could not add the patient. Please try again.",
+            description: `Could not ${isEditMode ? 'update' : 'add'} the patient. Please try again.`,
             variant: "destructive"
         })
     }
+  }
+
+  if (loading) {
+    return (
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+            <Skeleton className="h-10 w-36" />
+        </div>
+    )
   }
 
   return (
@@ -267,10 +302,15 @@ export function PatientForm() {
         </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Adding Patient..." : (
+          {form.formState.isSubmitting ? (
+            <>
+                <Loader2 className="mr-2 animate-spin" />
+                {isEditMode ? "Updating Patient..." : "Adding Patient..."}
+            </>
+          ) : (
             <>
                 <PlusCircle className="mr-2" />
-                Add Patient
+                {isEditMode ? "Update Patient" : "Add Patient"}
             </>
           )}
         </Button>

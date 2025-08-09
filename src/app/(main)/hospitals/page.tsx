@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   Table,
@@ -48,9 +49,11 @@ export default function HospitalsPage() {
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Hospitals</h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Hospital
+        <Button asChild>
+          <Link href="/hospitals/add">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Hospital
+          </Link>
         </Button>
       </header>
       <Card>
@@ -105,7 +108,7 @@ export default function HospitalsPage() {
                     </TableCell>
                     <TableCell>{hospital.location}</TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
+                      <div className="flex flex-wrap gap-1">
                         {hospital.specialties.map((spec) => (
                           <Badge key={spec} variant="secondary">
                             {spec}
@@ -127,7 +130,9 @@ export default function HospitalsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/hospitals/${hospital._id}/edit`}>Edit</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-destructive">
                             Delete
