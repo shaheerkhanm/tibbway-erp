@@ -1,5 +1,6 @@
+
 export type Patient = {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   country: string;
@@ -11,7 +12,7 @@ export type Patient = {
 };
 
 export type Hospital = {
-  id: string;
+  _id: string;
   name: string;
   location: string;
   contact: string;
@@ -20,7 +21,7 @@ export type Hospital = {
 };
 
 export type Doctor = {
-  id: string;
+  _id: string;
   name: string;
   specialty: string;
   hospital: string;
@@ -29,7 +30,7 @@ export type Doctor = {
 };
 
 export type Invoice = {
-  id: string;
+  _id: string;
   patientName: string;
   patientId: string;
   amount: number;
@@ -39,7 +40,7 @@ export type Invoice = {
 };
 
 export type Appointment = {
-  id: string;
+  _id: string;
   patientId: string;
   patientName: string;
   doctorId: string;

@@ -1,7 +1,10 @@
+
 import mongoose, { Schema, Document, models, Model } from 'mongoose';
 import { Patient } from '@/lib/types';
 
-const PatientSchema = new Schema<Patient>({
+export interface IPatient extends Omit<Patient, '_id'>, Document {}
+
+const PatientSchema = new Schema<IPatient>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   country: { type: String, required: true },
@@ -12,6 +15,6 @@ const PatientSchema = new Schema<Patient>({
   avatar: { type: String, required: true },
 });
 
-const PatientModel = (models.Patient as Model<Patient>) || mongoose.model<Patient>('Patient', PatientSchema);
+const PatientModel = (models.Patient as Model<IPatient>) || mongoose.model<IPatient>('Patient', PatientSchema);
 
 export default PatientModel;

@@ -1,7 +1,10 @@
+
 import mongoose, { Schema, Document, models, Model } from 'mongoose';
 import { Doctor } from '@/lib/types';
 
-const DoctorSchema = new Schema<Doctor>({
+export interface IDoctor extends Omit<Doctor, '_id'>, Document {}
+
+const DoctorSchema = new Schema<IDoctor>({
   name: { type: String, required: true },
   specialty: { type: String, required: true },
   hospital: { type: String, required: true },
@@ -9,6 +12,6 @@ const DoctorSchema = new Schema<Doctor>({
   imageUrl: { type: String, required: true },
 });
 
-const DoctorModel = (models.Doctor as Model<Doctor>) || mongoose.model<Doctor>('Doctor', DoctorSchema);
+const DoctorModel = (models.Doctor as Model<IDoctor>) || mongoose.model<IDoctor>('Doctor', DoctorSchema);
 
 export default DoctorModel;
