@@ -35,7 +35,12 @@ export default function HospitalsPage() {
       try {
         const response = await fetch('/api/hospitals');
         const data = await response.json();
-        setHospitals(data);
+        if (Array.isArray(data)) {
+            setHospitals(data);
+        } else {
+            console.error("Fetched data is not an array:", data);
+            setHospitals([]);
+        }
       } catch (error) {
         console.error("Failed to fetch hospitals", error);
       } finally {
