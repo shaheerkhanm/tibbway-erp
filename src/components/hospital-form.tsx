@@ -46,6 +46,9 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
   const form = useForm<HospitalFormValues>({
     resolver: zodResolver(hospitalFormSchema),
     defaultValues: {
+        name: "",
+        location: "",
+        contact: "",
         specialties: []
     }
   })
