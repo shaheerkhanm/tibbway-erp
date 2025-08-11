@@ -21,9 +21,9 @@ export async function POST(request: Request) {
     const hospital = await HospitalModel.create(body);
     return NextResponse.json(hospital, { status: 201 });
   } catch (error: any) {
-    console.error(error);
+    console.error("Failed to create hospital:", error);
     if (error.code === 11000) {
-      return NextResponse.json({ error: "Hospital with this name already exists.", code: 11000 }, { status: 500 });
+      return NextResponse.json({ error: "Hospital with this name already exists.", code: 11000 }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to create hospital" }, { status: 500 });
   }
