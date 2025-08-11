@@ -55,24 +55,3 @@ export const mockAppointments: Appointment[] = [
         status: 'Scheduled'
     }
 ];
-
-
-export const kpiData = {
-  monthlyPatients: 124,
-  monthlyRevenue: 256000,
-  topCountries: [
-    { name: 'USA', value: 45 },
-    { name: 'UAE', value: 30 },
-    { name: 'Canada', value: 20 },
-    { name: 'Russia', value: 15 },
-    { name: 'China', value: 14 },
-  ],
-  revenueByMonth: [
-    { month: 'Jan', revenue: 180000 },
-    { month: 'Feb', revenue: 210000 },
-    { month: 'Mar', revenue: 230000 },
-    { month: 'Apr', revenue: 190000 },
-    { month: 'May', revenue: 240000 },
-    { month: 'Jun', revenue: 256000 },
-  ]
-};
