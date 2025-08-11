@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -59,7 +60,12 @@ export default function PatientsPage() {
       try {
         const response = await fetch('/api/patients');
         const data = await response.json();
-        setPatients(data);
+        if (Array.isArray(data)) {
+          setPatients(data);
+        } else {
+          console.error("Fetched data is not an array:", data);
+          setPatients([]);
+        }
       } catch (error) {
         console.error("Failed to fetch patients", error);
       } finally {
