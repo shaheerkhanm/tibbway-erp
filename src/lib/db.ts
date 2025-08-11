@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+// Import models to ensure they are registered
 import './models/appointment.model';
 import './models/doctor.model';
 import './models/hospital.model';
@@ -37,8 +38,6 @@ async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000, // 5 second timeout
-      socketTimeoutMS: 45000, // 45 second timeout
     };
 
     console.log("Creating new database connection...");
