@@ -10,7 +10,7 @@ export async function GET() {
     const hospitals = await HospitalModel.find({}).lean();
     return NextResponse.json(hospitals);
   } catch (error) {
-    console.error(error);
+    console.error("Failed to fetch hospitals:", error);
     return NextResponse.json([], { status: 500 });
   }
 }
