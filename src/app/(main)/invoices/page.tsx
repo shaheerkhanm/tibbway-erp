@@ -39,7 +39,12 @@ export default function InvoicesPage() {
         try {
             const response = await fetch('/api/invoices');
             const data = await response.json();
-            setInvoices(data);
+            if (Array.isArray(data)) {
+                setInvoices(data);
+            } else {
+                console.error("Fetched data is not an array:", data);
+                setInvoices([]);
+            }
         } catch (error) {
             console.error("Failed to fetch invoices", error);
         } finally {

@@ -6,7 +6,7 @@ import InvoiceModel from "@/lib/models/invoice.model";
 export async function GET() {
   try {
     await connectDB();
-    const invoices = await InvoiceModel.find({});
+    const invoices = await InvoiceModel.find({}).lean();
     return NextResponse.json(invoices);
   } catch (error) {
     console.error(error);
