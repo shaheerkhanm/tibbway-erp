@@ -67,7 +67,7 @@ export default function DashboardPage() {
           <CardContent>
             {loading ? <Skeleton className="h-8 w-32" /> : (
                 <>
-                    <div className="text-2xl font-bold">${kpiData?.monthlyRevenue.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">${kpiData?.monthlyRevenue?.toLocaleString() ?? 0}</div>
                     <p className="text-xs text-muted-foreground">
                     +20.1% from last month
                     </p>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
           <CardContent>
              {loading ? <Skeleton className="h-8 w-24" /> : (
                 <>
-                    <div className="text-2xl font-bold">+{kpiData?.monthlyPatients}</div>
+                    <div className="text-2xl font-bold">+{kpiData?.monthlyPatients ?? 0}</div>
                     <p className="text-xs text-muted-foreground">
                     +180.1% from last month
                     </p>
@@ -101,9 +101,9 @@ export default function DashboardPage() {
           <CardContent>
             {loading ? <Skeleton className="h-8 w-28" /> : (
                 <>
-                    <div className="text-2xl font-bold">{kpiData?.topCountries[0].name}</div>
+                    <div className="text-2xl font-bold">{kpiData?.topCountries?.[0]?.name ?? 'N/A'}</div>
                     <p className="text-xs text-muted-foreground">
-                    {kpiData?.topCountries[0].value} patients this month
+                    {kpiData?.topCountries?.[0]?.value ?? 0} patients this month
                     </p>
                 </>
             )}
@@ -153,7 +153,7 @@ export default function DashboardPage() {
           <CardContent>
              {loading ? <Skeleton className="h-40 w-full" /> : (
                 <div className="space-y-4">
-                {kpiData?.topCountries.map((country) => (
+                {kpiData?.topCountries?.map((country) => (
                     <div key={country.name} className="flex items-center">
                     <div>{country.name}</div>
                     <div className="ml-auto font-medium">{country.value}</div>
