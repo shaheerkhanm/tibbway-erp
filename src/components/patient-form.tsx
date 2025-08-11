@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -72,8 +73,24 @@ export function PatientForm({ patientId }: PatientFormProps) {
                 fetch('/api/doctors'),
                 fetch('/api/hospitals'),
             ]);
-            setDoctors(await doctorsRes.json());
-            setHospitals(await hospitalsRes.json());
+
+            const doctorsData = await doctorsRes.json();
+            const hospitalsData = await hospitalsRes.json();
+
+            if (Array.isArray(doctorsData)) {
+              setDoctors(doctorsData);
+            } else {
+              setDoctors([]);
+              console.error("Fetched doctors data is not an array:", doctorsData);
+            }
+            
+            if (Array.isArray(hospitalsData)) {
+              setHospitals(hospitalsData);
+            } else {
+              setHospitals([]);
+              console.error("Fetched hospitals data is not an array:", hospitalsData);
+            }
+
 
             if (isEditMode) {
                 const patientRes = await fetch(`/api/patients/${patientId}`);
