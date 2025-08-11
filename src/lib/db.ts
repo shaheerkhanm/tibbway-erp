@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+import './models/appointment.model';
+import './models/doctor.model';
+import './models/hospital.model';
+import './models/invoice.model';
+import './models/patient.model';
+
 dotenv.config({ path: '.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -24,6 +30,7 @@ if (!cached) {
 
 async function connectDB() {
   if (cached.conn) {
+    console.log("Using cached database connection.");
     return cached.conn;
   }
 
@@ -32,6 +39,7 @@ async function connectDB() {
       bufferCommands: false,
     };
 
+    console.log("Creating new database connection...");
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       console.log("MongoDB connected successfully.");
       return mongoose;
