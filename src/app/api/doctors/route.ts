@@ -6,7 +6,7 @@ import DoctorModel from "@/lib/models/doctor.model";
 export async function GET() {
   try {
     await connectDB();
-    const doctors = await DoctorModel.find({});
+    const doctors = await DoctorModel.find({}).lean();
     return NextResponse.json(doctors);
   } catch (error) {
     console.error(error);
