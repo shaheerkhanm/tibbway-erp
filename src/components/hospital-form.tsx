@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -105,18 +106,17 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
       });
 
       if (!response.ok) {
-        if (response.status === 500) {
-            const errorData = await response.json();
-            if (errorData.code === 11000) {
-                 toast({
-                    title: "Error: Hospital Exists",
-                    description: "A hospital with this name already exists. Please choose a different name.",
-                    variant: "destructive",
-                });
-                return;
-            }
+        const errorData = await response.json().catch(() => ({ error: "An unknown error occurred" }));
+        if (response.status === 409 && errorData.code === 11000) {
+            toast({
+                title: "Error: Hospital Exists",
+                description: "A hospital with this name already exists. Please choose a different name.",
+                variant: "destructive",
+            });
+        } else {
+             throw new Error(errorData.error || `Failed to ${isEditMode ? 'update' : 'create'} hospital`);
         }
-        throw new Error(`Failed to ${isEditMode ? 'update' : 'create'} hospital`);
+        return;
       }
 
       toast({
@@ -125,11 +125,11 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
       })
       router.push('/hospitals');
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error",
-        description: `Could not ${isEditMode ? 'update' : 'add'} the hospital. Please try again.`,
+        description: error.message || `Could not ${isEditMode ? 'update' : 'add'} the hospital. Please try again.`,
         variant: "destructive"
       })
     }
