@@ -10,8 +10,7 @@ export async function GET() {
     return NextResponse.json(doctors);
   } catch (error) {
     console.error(error);
-    // Ensure that even on error, we return something that won't crash the client
-    return NextResponse.json({ error: "Failed to fetch doctors" }, { status: 500 });
+    return NextResponse.json([], { status: 500 });
   }
 }
 

@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json(invoices);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to fetch invoices" }, { status: 500 });
+    return NextResponse.json([], { status: 500 });
   }
 }
 
@@ -25,4 +25,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
   }
 }
-
