@@ -4,21 +4,22 @@ import connectDB from "@/lib/db";
 import DoctorModel from "@/lib/models/doctor.model";
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  await connectDB();
   try {
+    await connectDB();
     const doctor = await DoctorModel.findById(params.id);
     if (!doctor) {
       return NextResponse.json({ error: "Doctor not found" }, { status: 404 });
     }
     return NextResponse.json(doctor);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to fetch doctor" }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  await connectDB();
   try {
+    await connectDB();
     const body = await request.json();
     const updatedDoctor = await DoctorModel.findByIdAndUpdate(params.id, body, { new: true });
     if (!updatedDoctor) {
@@ -26,19 +27,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json(updatedDoctor);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to update doctor" }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  await connectDB();
   try {
+    await connectDB();
     const deletedDoctor = await DoctorModel.findByIdAndDelete(params.id);
     if (!deletedDoctor) {
       return NextResponse.json({ error: "Doctor not found" }, { status: 404 });
     }
     return NextResponse.json({ message: "Doctor deleted successfully" });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to delete doctor" }, { status: 500 });
   }
 }
