@@ -103,7 +103,21 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
           imageUrl: `https://placehold.co/600x400.png`
         }),
       });
-      if (!response.ok) throw new Error(`Failed to ${isEditMode ? 'update' : 'create'} hospital`);
+
+      if (!response.ok) {
+        if (response.status === 500) {
+            const errorData = await response.json();
+            if (errorData.code === 11000) {
+                 toast({
+                    title: "Error: Hospital Exists",
+                    description: "A hospital with this name already exists. Please choose a different name.",
+                    variant: "destructive",
+                });
+                return;
+            }
+        }
+        throw new Error(`Failed to ${isEditMode ? 'update' : 'create'} hospital`);
+      }
 
       toast({
         title: `Hospital ${isEditMode ? 'Updated' : 'Added'}!`,
