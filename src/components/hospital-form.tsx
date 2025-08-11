@@ -114,7 +114,11 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
                 variant: "destructive",
             });
         } else {
-             throw new Error(errorData.error || `Failed to ${isEditMode ? 'update' : 'create'} hospital`);
+             toast({
+                title: `Error: ${isEditMode ? 'Update' : 'Creation'} Failed`,
+                description: errorData.error || `Could not ${isEditMode ? 'update' : 'add'} the hospital. Please try again.`,
+                variant: "destructive",
+            });
         }
         return;
       }
@@ -129,7 +133,7 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
       console.error(error);
       toast({
         title: "Error",
-        description: error.message || `Could not ${isEditMode ? 'update' : 'add'} the hospital. Please try again.`,
+        description: `Could not ${isEditMode ? 'update' : 'add'} the hospital. Please try again.`,
         variant: "destructive"
       })
     }
