@@ -3,6 +3,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   MoreHorizontal,
   PlusCircle,
@@ -62,11 +63,12 @@ const statusVariant: { [key: string]: "default" | "secondary" | "destructive" | 
 
 export default function PatientsPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [patients, setPatients] = React.useState<Patient[]>([])
   const [loading, setLoading] = React.useState(true)
   const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = React.useState(searchParams.get("search") || "");
 
   const fetchPatients = React.useCallback(async () => {
     setLoading(true);
@@ -89,6 +91,10 @@ export default function PatientsPage() {
   React.useEffect(() => {
     fetchPatients();
   }, [fetchPatients])
+  
+  React.useEffect(() => {
+    setSearchTerm(searchParams.get("search") || "");
+  }, [searchParams]);
 
   const handleDeletePatient = async () => {
     if (!patientToDelete) return;

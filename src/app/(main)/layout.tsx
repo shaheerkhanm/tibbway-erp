@@ -1,7 +1,7 @@
 "use client"
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import {
   SidebarProvider,
@@ -46,6 +46,7 @@ const menuItems = [
   { href: "/patients", label: "Patients", icon: Users },
   { href: "/hospitals", label: "Hospitals", icon: Building },
   { href: "/doctors", label: "Doctors", icon: Stethoscope },
+  { href: "/appointments", label: "Appointments", icon: Users },
   { href: "/invoices", label: "Invoices", icon: FileText },
   { href: "/reports", label: "Reports", icon: LineChart },
   { href: "/audit-logs", label: "Audit Logs", icon: Shield },
@@ -58,6 +59,16 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter();
+  const [globalSearch, setGlobalSearch] = React.useState("");
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && globalSearch.trim() !== '') {
+        // For simplicity, we'll redirect to the patients page with the search query.
+        // A more advanced implementation could have a dedicated global search results page.
+        router.push(`/patients?search=${globalSearch}`);
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -136,7 +147,13 @@ export default function MainLayout({
            <SidebarTrigger className="md:hidden"/>
            <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search patients, hospitals, doctors..." className="pl-10 w-full max-w-md bg-background" />
+            <Input 
+              placeholder="Search patients, hospitals, doctors..." 
+              className="pl-10 w-full max-w-md bg-background"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              onKeyDown={handleSearch}
+            />
            </div>
            <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative">
