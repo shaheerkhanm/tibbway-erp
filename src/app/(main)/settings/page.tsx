@@ -12,6 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -43,6 +53,9 @@ export default function SettingsPage() {
   const [users, setUsers] = React.useState<User[]>([])
   const [loading, setLoading] = React.useState(true)
   const { toast } = useToast()
+  const [userToDelete, setUserToDelete] = React.useState<User | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+
 
   const fetchUsers = React.useCallback(async () => {
     setLoading(true)
@@ -90,8 +103,40 @@ export default function SettingsPage() {
     }
   }
 
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    try {
+        const response = await fetch(`/api/users/${userToDelete._id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error("Failed to delete user.");
+
+        toast({
+            title: "User Removed",
+            description: `${userToDelete.name} has been successfully removed.`,
+        });
+        fetchUsers(); // Refresh the list
+    } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+            title: "Error",
+            description: "Could not remove the user. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsAlertOpen(false);
+        setUserToDelete(null);
+    }
+  };
+
+  const openConfirmationDialog = (user: User) => {
+    setUserToDelete(user);
+    setIsAlertOpen(true);
+  };
+
 
   return (
+    <>
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">User Management</h1>
@@ -180,7 +225,7 @@ export default function SettingsPage() {
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog(user)}>
                             Remove User
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -194,6 +239,23 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
+    <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently remove the user
+                and revoke their access.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setUserToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser}>
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
-

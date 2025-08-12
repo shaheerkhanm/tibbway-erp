@@ -21,6 +21,16 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -35,6 +45,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Patient, UserRole } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 
 // This is a placeholder for actual user role from a session
 const currentUserRole: UserRole = 'Super Admin';
@@ -49,30 +60,68 @@ const statusVariant: { [key: string]: "default" | "secondary" | "destructive" | 
 }
 
 export default function PatientsPage() {
+  const { toast } = useToast();
   const [patients, setPatients] = React.useState<Patient[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+
+  const fetchPatients = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/patients');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setPatients(data);
+      } else {
+        console.error("Fetched data is not an array:", data);
+        setPatients([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch patients", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const response = await fetch('/api/patients');
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setPatients(data);
-        } else {
-          console.error("Fetched data is not an array:", data);
-          setPatients([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch patients", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPatients();
-  }, [])
+  }, [fetchPatients])
+
+  const handleDeletePatient = async () => {
+    if (!patientToDelete) return;
+    try {
+        const response = await fetch(`/api/patients/${patientToDelete._id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error("Failed to delete patient.");
+
+        toast({
+            title: "Patient Deleted",
+            description: `${patientToDelete.name} has been successfully removed.`,
+        });
+        fetchPatients(); // Refresh the list
+    } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+            title: "Error",
+            description: "Could not delete the patient. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsAlertOpen(false);
+        setPatientToDelete(null);
+    }
+  };
+
+  const openConfirmationDialog = (patient: Patient) => {
+    setPatientToDelete(patient);
+    setIsAlertOpen(true);
+  };
+
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <div>
@@ -205,7 +254,7 @@ export default function PatientsPage() {
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 {currentUserRole === 'Super Admin' && (
                                     <>
-                                        <DropdownMenuItem className="text-destructive">
+                                        <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog(patient)}>
                                             Delete
                                         </DropdownMenuItem>
                                     </>
@@ -223,5 +272,23 @@ export default function PatientsPage() {
         </CardContent>
       </Card>
     </div>
+    <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the patient
+                and remove their data from our servers.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPatientToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePatient}>
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

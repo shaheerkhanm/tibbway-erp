@@ -5,6 +5,16 @@ import * as React from "react"
 import Link from "next/link"
 import { MoreHorizontal, PlusCircle, Building2, MapPin, Phone, Mail, Edit, Search } from "lucide-react"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,18 +29,23 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { useToast } from "@/hooks/use-toast"
 
 const currentUserRole: UserRole = 'Super Admin';
 
 const MAX_SPECIALTIES_VISIBLE = 3;
 
 export default function HospitalsPage() {
+  const { toast } = useToast();
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [hospitalToDelete, setHospitalToDelete] = React.useState<Hospital | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    const fetchHospitals = async () => {
-      try {
+
+  const fetchHospitals = React.useCallback(async () => {
+    setLoading(true);
+    try {
         const response = await fetch('/api/hospitals');
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -39,16 +54,52 @@ export default function HospitalsPage() {
             console.error("Fetched data is not an array:", data);
             setHospitals([]);
         }
-      } catch (error) {
+    } catch (error) {
         console.error("Failed to fetch hospitals", error);
-      } finally {
+    } finally {
         setLoading(false);
-      }
-    };
+    }
+  }, []);
+
+
+  React.useEffect(() => {
     fetchHospitals();
-  }, [])
+  }, [fetchHospitals])
+
+
+  const handleDeleteHospital = async () => {
+    if (!hospitalToDelete) return;
+    try {
+        const response = await fetch(`/api/hospitals/${hospitalToDelete._id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error("Failed to delete hospital.");
+
+        toast({
+            title: "Hospital Deleted",
+            description: `${hospitalToDelete.name} has been successfully removed.`,
+        });
+        fetchHospitals(); // Refresh the list
+    } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+            title: "Error",
+            description: "Could not delete the hospital. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsAlertOpen(false);
+        setHospitalToDelete(null);
+    }
+  };
+
+  const openConfirmationDialog = (hospital: Hospital) => {
+    setHospitalToDelete(hospital);
+    setIsAlertOpen(true);
+  };
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <div>
@@ -127,7 +178,7 @@ export default function HospitalsPage() {
                             {currentUserRole === 'Super Admin' && (
                                 <>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog(hospital)}>
                                     Delete
                                 </DropdownMenuItem>
                                 </>
@@ -196,7 +247,23 @@ export default function HospitalsPage() {
         </div>
       )}
     </div>
+     <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the hospital
+                and remove its data from our servers.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setHospitalToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteHospital}>
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
-
-    

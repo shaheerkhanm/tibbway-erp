@@ -13,6 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -26,17 +36,21 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 // This is a placeholder for actual user role from a session
 const currentUserRole: UserRole = 'Super Admin';
 
 export default function DoctorsPage() {
+  const { toast } = useToast();
   const [doctors, setDoctors] = React.useState<Doctor[]>([])
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [doctorToDelete, setDoctorToDelete] = React.useState<Doctor | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    const fetchDoctorsAndHospitals = async () => {
+  const fetchDoctorsAndHospitals = React.useCallback(async () => {
+      setLoading(true);
       try {
         const [doctorsResponse, hospitalsResponse] = await Promise.all([
             fetch("/api/doctors"),
@@ -53,11 +67,46 @@ export default function DoctorsPage() {
       } finally {
         setLoading(false)
       }
-    }
+  }, []);
+
+
+  React.useEffect(() => {
     fetchDoctorsAndHospitals()
-  }, [])
+  }, [fetchDoctorsAndHospitals])
+
+  const handleDeleteDoctor = async () => {
+    if (!doctorToDelete) return;
+    try {
+        const response = await fetch(`/api/doctors/${doctorToDelete._id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error("Failed to delete doctor.");
+
+        toast({
+            title: "Doctor Deleted",
+            description: `Dr. ${doctorToDelete.name} has been successfully removed.`,
+        });
+        fetchDoctorsAndHospitals(); // Refresh the list
+    } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+            title: "Error",
+            description: "Could not delete the doctor. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsAlertOpen(false);
+        setDoctorToDelete(null);
+    }
+  };
+
+  const openConfirmationDialog = (doctor: Doctor) => {
+    setDoctorToDelete(doctor);
+    setIsAlertOpen(true);
+  };
 
   return (
+    <>
     <div className="flex flex-col gap-6">
        <header className="flex items-center justify-between">
         <div>
@@ -136,7 +185,7 @@ export default function DoctorsPage() {
                             {currentUserRole === 'Super Admin' && (
                                 <>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog(doctor)}>
                                     Delete
                                 </DropdownMenuItem>
                                 </>
@@ -201,5 +250,23 @@ export default function DoctorsPage() {
         </div>
       )}
     </div>
+    <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the doctor
+                and remove their data from our servers.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDoctorToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteDoctor}>
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
