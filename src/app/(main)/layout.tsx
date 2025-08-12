@@ -1,3 +1,4 @@
+
 "use client"
 import * as React from "react"
 import Link from "next/link"
@@ -44,6 +45,7 @@ import { Input } from "@/components/ui/input"
 
 const menuItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/patients", label: "Patients", icon: Users },
   { href: "/hospitals", label: "Hospitals", icon: Building },
   { href: "/doctors", label: "Doctors", icon: Stethoscope },
@@ -65,9 +67,7 @@ export default function MainLayout({
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && globalSearch.trim() !== '') {
-        // For simplicity, we'll redirect to the patients page with the search query.
-        // A more advanced implementation could have a dedicated global search results page.
-        router.push(`/patients?search=${globalSearch}`);
+        router.push(`/search?q=${globalSearch}`);
     }
   }
 

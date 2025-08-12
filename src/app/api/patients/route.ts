@@ -1,12 +1,29 @@
 
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/lib/db";
 import PatientModel from "@/lib/models/patient.model";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    const patients = await PatientModel.find({}).lean();
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get('q');
+    
+    let query = {};
+    if (q) {
+        query = {
+            $or: [
+                { name: { $regex: q, $options: 'i' } },
+                { email: { $regex: q, $options: 'i' } },
+                { patientId: { $regex: q, $options: 'i' } },
+                { country: { $regex: q, $options: 'i' } },
+                { assignedHospital: { $regex: q, $options: 'i' } },
+                { assignedDoctor: { $regex: q, $options: 'i' } }
+            ]
+        }
+    }
+
+    const patients = await PatientModel.find(query).lean();
     return NextResponse.json(patients);
   } catch (error) {
     console.error(error);
