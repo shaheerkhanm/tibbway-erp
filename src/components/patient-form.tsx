@@ -39,7 +39,7 @@ const patientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
   country: z.string().min(2, "Country is required."),
-  status: z.enum(['Pending', 'In Treatment', 'Discharged', 'Cancelled']),
+  status: z.enum(['Pending', 'In Treatment', 'Discharged', 'Cancelled', 'Confirmed', 'Lead']),
   assignedDoctor: z.string().min(1, "Doctor is required."),
   assignedHospital: z.string().min(1, "Hospital is required."),
   treatmentDate: z.date({
@@ -122,12 +122,24 @@ export function PatientForm({ patientId }: PatientFormProps) {
     const apiEndpoint = isEditMode ? `/api/patients/${patientId}` : '/api/patients';
     const method = isEditMode ? 'PUT' : 'POST';
 
+    // Find the full doctor and hospital objects
+    const doctorName = doctors.find(d => d._id === data.assignedDoctor)?.name;
+    const hospitalName = hospitals.find(h => h._id === data.assignedHospital)?.name;
+
+    if (!doctorName || !hospitalName) {
+      toast({ title: "Error", description: "Invalid doctor or hospital selection.", variant: "destructive" });
+      return;
+    }
+
     try {
         const response = await fetch(apiEndpoint, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 ...data,
+                // Send the full name, not the ID, to match the existing model logic
+                assignedDoctor: doctorName, 
+                assignedHospital: hospitalName,
                 treatmentDate: format(data.treatmentDate, "yyyy-MM-dd"),
                 avatar: `https://placehold.co/100x100.png?text=${data.name.charAt(0)}`
             }),
@@ -236,7 +248,9 @@ export function PatientForm({ patientId }: PatientFormProps) {
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                        <SelectItem value="Lead">Lead</SelectItem>
                         <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Confirmed">Confirmed</SelectItem>
                         <SelectItem value="In Treatment">In Treatment</SelectItem>
                         <SelectItem value="Discharged">Discharged</SelectItem>
                         <SelectItem value="Cancelled">Cancelled</SelectItem>
@@ -260,7 +274,7 @@ export function PatientForm({ patientId }: PatientFormProps) {
                     </FormControl>
                     <SelectContent>
                     {hospitals.map(hospital => (
-                        <SelectItem key={hospital._id} value={hospital.name}>
+                        <SelectItem key={hospital._id} value={hospital._id}>
                         {hospital.name}
                         </SelectItem>
                     ))}
@@ -284,7 +298,7 @@ export function PatientForm({ patientId }: PatientFormProps) {
                     </FormControl>
                     <SelectContent>
                     {doctors.map(doctor => (
-                        <SelectItem key={doctor._id} value={doctor.name}>
+                        <SelectItem key={doctor._id} value={doctor._id}>
                         {doctor.name} ({doctor.specialty})
                         </SelectItem>
                     ))}

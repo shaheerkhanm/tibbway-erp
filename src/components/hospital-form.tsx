@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { PlusCircle, Loader2, X } from "lucide-react"
+import { getNames } from "country-list"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,11 +24,16 @@ import { useToast } from "@/hooks/use-toast"
 import type { Hospital } from "@/lib/types"
 import { Skeleton } from "./ui/skeleton"
 import { Badge } from "./ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { ScrollArea } from "./ui/scroll-area"
 
 const hospitalFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   location: z.string().min(2, "Location is required."),
+  country: z.string().min(2, "Country is required."),
   contact: z.string().email("Please enter a valid email address."),
+  phone: z.string().optional(),
+  contactPerson: z.string().optional(),
   specialties: z.array(z.string()).min(1, "At least one specialty is required."),
 })
 
@@ -43,13 +49,18 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
   const [loading, setLoading] = React.useState(true);
   const isEditMode = !!hospitalId;
   const [specialtyInput, setSpecialtyInput] = React.useState("");
+  const countryNames = React.useMemo(() => getNames(), []);
+
 
   const form = useForm<HospitalFormValues>({
     resolver: zodResolver(hospitalFormSchema),
     defaultValues: {
         name: "",
         location: "",
+        country: "",
         contact: "",
+        phone: "",
+        contactPerson: "",
         specialties: []
     }
   })
@@ -146,6 +157,9 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-20 w-full" />
             </div>
             <Skeleton className="h-10 w-36" />
@@ -175,9 +189,48 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Address / Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. New York, USA" {...field} />
+                  <Input placeholder="e.g. 123 Health St, Medical City" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Country</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <ScrollArea className="h-72">
+                        {countryNames.map(country => (
+                            <SelectItem key={country} value={country}>
+                            {country}
+                            </SelectItem>
+                        ))}
+                      </ScrollArea>
+                    </SelectContent>
+                </Select>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="+1-555-123-4567" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,43 +249,58 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
               </FormItem>
             )}
           />
-          <FormField
+           <FormField
             control={form.control}
-            name="specialties"
+            name="contactPerson"
             render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Specialties</FormLabel>
-                    <div className="flex gap-2">
-                        <Input 
-                            value={specialtyInput}
-                            onChange={(e) => setSpecialtyInput(e.target.value)}
-                            placeholder="e.g. Cardiology"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleSpecialtyAdd();
-                                }
-                            }}
-                        />
-                        <Button type="button" variant="outline" onClick={handleSpecialtyAdd}>Add</Button>
-                    </div>
-                    <FormDescription>
-                        Type a specialty and press Enter or click Add.
-                    </FormDescription>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                        {field.value.map(spec => (
-                            <Badge key={spec} variant="secondary">
-                                {spec}
-                                <button type="button" className="ml-2" onClick={() => handleSpecialtyRemove(spec)}>
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </Badge>
-                        ))}
-                    </div>
-                    <FormMessage />
-                </FormItem>
+              <FormItem>
+                <FormLabel>Contact Person</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Dr. Jane Smith" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            />
+          />
+          <div className="md:col-span-2">
+            <FormField
+                control={form.control}
+                name="specialties"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Specialties</FormLabel>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={specialtyInput}
+                                onChange={(e) => setSpecialtyInput(e.target.value)}
+                                placeholder="e.g. Cardiology"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleSpecialtyAdd();
+                                    }
+                                }}
+                            />
+                            <Button type="button" variant="outline" onClick={handleSpecialtyAdd}>Add</Button>
+                        </div>
+                        <FormDescription>
+                            Type a specialty and press Enter or click Add.
+                        </FormDescription>
+                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem]">
+                            {field.value.map(spec => (
+                                <Badge key={spec} variant="secondary">
+                                    {spec}
+                                    <button type="button" className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5" onClick={() => handleSpecialtyRemove(spec)}>
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
         </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>

@@ -185,7 +185,7 @@ export default function PatientsPage() {
                             <div className="font-medium">{patient.assignedHospital}</div>
                             <div className="text-sm text-muted-foreground">{patient.assignedDoctor}</div>
                         </TableCell>
-                        <TableCell>{patient.treatmentDate}</TableCell>
+                        <TableCell>{new Date(patient.treatmentDate).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button variant="ghost" size="icon">

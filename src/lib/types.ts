@@ -17,10 +17,10 @@ export type Hospital = {
   _id: string;
   name: string;
   location: string;
-  country?: string;
+  country: string;
   contact: string; // email
-  phone?: string;
-  contactPerson?: string;
+  phone: string;
+  contactPerson: string;
   specialties: string[];
   imageUrl: string;
   activePatients?: number;
