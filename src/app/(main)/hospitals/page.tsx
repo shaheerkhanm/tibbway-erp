@@ -172,6 +172,9 @@ export default function HospitalsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                             <DropdownMenuItem asChild>
+                                <Link href={`/hospitals/${hospital._id}`}>View Details</Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={`/hospitals/${hospital._id}/edit`}>Edit</Link>
                             </DropdownMenuItem>
@@ -239,7 +242,9 @@ export default function HospitalsPage() {
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </Link>
                     </Button>
-                    <Button className="w-full">View Details</Button>
+                    <Button className="w-full" asChild>
+                      <Link href={`/hospitals/${hospital._id}`}>View Details</Link>
+                    </Button>
                 </CardFooter>
               </Card>
             )

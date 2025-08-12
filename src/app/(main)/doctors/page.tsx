@@ -180,6 +180,9 @@ export default function DoctorsPage() {
                             <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
+                                <Link href={`/doctors/${doctor._id}`}>View Profile</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
                                 <Link href={`/doctors/${doctor._id}/edit`}>Edit</Link>
                             </DropdownMenuItem>
                             {currentUserRole === 'Super Admin' && (
@@ -243,7 +246,9 @@ export default function DoctorsPage() {
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </Link>
                     </Button>
-                    <Button className="w-full">View Schedule</Button>
+                    <Button className="w-full" asChild>
+                      <Link href={`/doctors/${doctor._id}`}>View Profile</Link>
+                    </Button>
                 </CardFooter>
             </Card>
           ))}

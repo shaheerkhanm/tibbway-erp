@@ -46,6 +46,7 @@ import type { Patient, UserRole } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 // This is a placeholder for actual user role from a session
 const currentUserRole: UserRole = 'Super Admin';
@@ -219,8 +220,16 @@ export default function PatientsPage() {
                     patients.map((patient) => (
                     <TableRow key={patient._id}>
                         <TableCell>
-                            <div className="font-medium">{patient.name}</div>
-                            <div className="text-sm text-muted-foreground">{patient.patientId || `US${patient._id.slice(-7)}`}</div>
+                            <div className="flex items-center gap-3">
+                                <Avatar className="size-8">
+                                    <AvatarImage src={patient.avatar} alt={patient.name} data-ai-hint="person face" />
+                                    <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <div className="font-medium">{patient.name}</div>
+                                    <div className="text-sm text-muted-foreground">{patient.patientId || `US${patient._id.slice(-7)}`}</div>
+                                </div>
+                            </div>
                         </TableCell>
                         <TableCell>{patient.country}</TableCell>
                         <TableCell>
@@ -237,8 +246,8 @@ export default function PatientsPage() {
                         <TableCell>{new Date(patient.treatmentDate).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4"/>
+                            <Button variant="ghost" size="icon" asChild>
+                              <Link href={`/patients/${patient._id}`}><Eye className="h-4 w-4"/></Link>
                             </Button>
                             <Button variant="ghost" size="icon" asChild>
                               <Link href={`/patients/${patient._id}/edit`}><Edit className="h-4 w-4"/></Link>
