@@ -136,7 +136,7 @@ export default function DashboardPage() {
                             cursor={false}
                             content={<ChartTooltipContent indicator="dot" />}
                             />
-                            <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+                            <Bar dataKey="revenue" fill="var(--color-primary)" radius={4} />
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>

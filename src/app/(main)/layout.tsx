@@ -59,8 +59,10 @@ export default function MainLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Stethoscope className="size-6 text-primary" />
-            <h1 className="text-lg font-semibold">Tibbway Medical Tourism</h1>
+            <div className="flex items-center justify-center size-8 rounded-lg bg-primary text-primary-foreground">
+                <Stethoscope className="size-5" />
+            </div>
+            <h1 className="text-lg font-semibold">Tibbway</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>
