@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import {
   SidebarProvider,
@@ -63,7 +63,12 @@ export default function MainLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter();
-  const [globalSearch, setGlobalSearch] = React.useState("");
+  const searchParams = useSearchParams();
+  const [globalSearch, setGlobalSearch] = React.useState(searchParams.get("q") || "");
+
+  React.useEffect(() => {
+    setGlobalSearch(searchParams.get("q") || "");
+  }, [searchParams]);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && globalSearch.trim() !== '') {
