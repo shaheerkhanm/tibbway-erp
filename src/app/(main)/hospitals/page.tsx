@@ -21,10 +21,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import type { Hospital } from "@/lib/types"
+import type { Hospital, UserRole } from "@/lib/types"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+
+// This is a placeholder for actual user role from a session
+const currentUserRole: UserRole = 'Super Admin';
 
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
@@ -138,10 +141,14 @@ export default function HospitalsPage() {
                           <DropdownMenuItem asChild>
                             <Link href={`/hospitals/${hospital._id}/edit`}>Edit</Link>
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
+                          {currentUserRole === 'Super Admin' && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive">
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

@@ -44,6 +44,7 @@ const menuItems = [
   { href: "/hospitals", label: "Hospitals", icon: Building },
   { href: "/doctors", label: "Doctors", icon: Stethoscope },
   { href: "/invoices", label: "Invoices", icon: FileText },
+  { href: "/settings", label: "Settings", icon: Settings },
 ]
 
 export default function MainLayout({
@@ -59,7 +60,7 @@ export default function MainLayout({
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Stethoscope className="size-6 text-primary" />
-            <h1 className="text-lg font-semibold">Tibbway</h1>
+            <h1 className="text-lg font-semibold">Tibbway Medical Tourism</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>

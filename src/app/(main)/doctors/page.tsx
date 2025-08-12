@@ -20,10 +20,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import type { Doctor } from "@/lib/types"
+import type { Doctor, UserRole } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+
+// This is a placeholder for actual user role from a session
+const currentUserRole: UserRole = 'Super Admin';
 
 export default function DoctorsPage() {
   const [doctors, setDoctors] = React.useState<Doctor[]>([])
@@ -127,10 +130,14 @@ export default function DoctorsPage() {
                           <DropdownMenuItem asChild>
                             <Link href={`/doctors/${doctor._id}/edit`}>Edit</Link>
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
+                          {currentUserRole === 'Super Admin' && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive">
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

@@ -20,9 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import type { Invoice } from "@/lib/types"
+import type { Invoice, UserRole } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+
+// This is a placeholder for actual user role from a session
+const currentUserRole: UserRole = 'Super Admin';
 
 const statusVariant: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
     Paid: "default",
@@ -112,10 +115,14 @@ export default function InvoicesPage() {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>View Invoice</DropdownMenuItem>
                             <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                                Delete
-                            </DropdownMenuItem>
+                            {currentUserRole === 'Super Admin' && (
+                                <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">
+                                    Delete
+                                </DropdownMenuItem>
+                                </>
+                            )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                         </TableCell>

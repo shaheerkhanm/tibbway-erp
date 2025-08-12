@@ -51,3 +51,13 @@ export type Appointment = {
   reason: string;
   status: 'Scheduled' | 'Completed' | 'Cancelled';
 };
+
+export type UserRole = 'Super Admin' | 'Admin' | 'Staff';
+
+export type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+}

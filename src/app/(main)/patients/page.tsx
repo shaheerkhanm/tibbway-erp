@@ -30,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import type { Patient } from "@/lib/types"
+import type { Patient, UserRole } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Popover,
@@ -42,6 +42,9 @@ import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+
+// This is a placeholder for actual user role from a session
+const currentUserRole: UserRole = 'Super Admin';
 
 const statusVariant: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
     "In Treatment": "default",
@@ -206,10 +209,14 @@ export default function PatientsPage() {
                             <Link href={`/patients/${patient._id}/edit`}>Edit</Link>
                           </DropdownMenuItem>
                         <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                            Delete
-                        </DropdownMenuItem>
+                        {currentUserRole === 'Super Admin' && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">
+                                    Delete
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                     </TableCell>

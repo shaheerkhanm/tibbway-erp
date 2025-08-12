@@ -7,6 +7,7 @@ import HospitalModel from './models/hospital.model';
 import DoctorModel from './models/doctor.model';
 import InvoiceModel from './models/invoice.model';
 import AppointmentModel from './models/appointment.model';
+import UserModel from './models/user.model';
 import { mockPatients, mockHospitals, mockDoctors, mockInvoices, mockAppointments } from './mock-data';
 
 async function seedDatabase() {
@@ -21,6 +22,7 @@ async function seedDatabase() {
         await DoctorModel.deleteMany({});
         await InvoiceModel.deleteMany({});
         await AppointmentModel.deleteMany({});
+        await UserModel.deleteMany({});
         console.log('Existing data cleared.');
 
         console.log('Inserting mock data...');
@@ -39,6 +41,17 @@ async function seedDatabase() {
         await AppointmentModel.insertMany(mockAppointments);
         console.log(`${mockAppointments.length} appointments inserted.`);
         
+        const superAdmin = {
+            name: 'Super Admin',
+            email: 'admin@tibbway.com',
+            // In a real app, use bcrypt to hash passwords
+            password: 'password', 
+            role: 'Super Admin',
+            avatar: 'https://placehold.co/100x100.png'
+        };
+        await UserModel.create(superAdmin);
+        console.log('Super Admin user created.');
+
         console.log('Database seeded successfully!');
     } catch (error) {
         console.error('Error seeding database:', error);
