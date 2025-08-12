@@ -30,16 +30,16 @@ export const mockPatients: Omit<Patient, '_id'>[] = [
 ];
 
 export const mockInvoices: Omit<Invoice, '_id'>[] = [
-  { patientName: 'John Doe', patientId: 'PAT001', amount: 15000, status: 'Paid', dueDate: '2024-08-01', issuedDate: '2024-07-15' },
-  { patientName: 'Ahmed Al-Farsi', patientId: 'PAT003', amount: 8500, status: 'Paid', dueDate: '2024-07-10', issuedDate: '2024-06-25' },
-  { patientName: 'Fatima Zohra', patientId: 'PAT004', amount: 22000, status: 'Unpaid', dueDate: format(addDays(today, 10), 'yyyy-MM-dd'), issuedDate: format(subDays(today, 5), 'yyyy-MM-dd') },
-  { patientName: 'Jane Smith', patientId: 'PAT002', amount: 12500, status: 'Unpaid', dueDate: format(addDays(today, 25), 'yyyy-MM-dd'), issuedDate: format(addDays(today, 10), 'yyyy-MM-dd') },
-  { patientName: 'Olga Petrova', patientId: 'PAT006', amount: 500, status: 'Overdue', dueDate: format(subDays(today, 5), 'yyyy-MM-dd'), issuedDate: format(subDays(today, 20), 'yyyy-MM-dd') },
+  { patientName: 'John Doe', patientId: 'US-87236', amount: 15000, status: 'Paid', dueDate: '2024-08-01', issuedDate: '2024-07-15' },
+  { patientName: 'Ahmed Al-Farsi', patientId: 'AE-34789', amount: 8500, status: 'Paid', dueDate: '2024-07-10', issuedDate: '2024-06-25' },
+  { patientName: 'Fatima Zohra', patientId: 'MA-23987', amount: 22000, status: 'Unpaid', dueDate: format(addDays(today, 10), 'yyyy-MM-dd'), issuedDate: format(subDays(today, 5), 'yyyy-MM-dd') },
+  { patientName: 'Jane Smith', patientId: 'CA-94023', amount: 12500, status: 'Unpaid', dueDate: format(addDays(today, 25), 'yyyy-MM-dd'), issuedDate: format(addDays(today, 10), 'yyyy-MM-dd') },
+  { patientName: 'Olga Petrova', patientId: 'RU-19823', amount: 500, status: 'Overdue', dueDate: format(subDays(today, 5), 'yyyy-MM-dd'), issuedDate: format(subDays(today, 20), 'yyyy-MM-dd') },
 ];
 
 export const mockAppointments: Omit<Appointment, '_id'>[] = [
     { 
-        patientId: 'PAT001',
+        patientId: 'US-87236',
         patientName: 'John Doe',
         doctorId: 'DOC01',
         doctorName: 'Dr. Rajesh Kumar',
@@ -50,7 +50,7 @@ export const mockAppointments: Omit<Appointment, '_id'>[] = [
         status: 'Scheduled'
     },
     { 
-        patientId: 'PAT004',
+        patientId: 'MA-23987',
         patientName: 'Fatima Zohra',
         doctorId: 'DOC01',
         doctorName: 'Dr. Rajesh Kumar',
@@ -61,7 +61,7 @@ export const mockAppointments: Omit<Appointment, '_id'>[] = [
         status: 'Scheduled'
     },
     {
-        patientId: 'PAT006',
+        patientId: 'RU-19823',
         patientName: 'Olga Petrova',
         doctorId: 'DOC03',
         doctorName: 'Dr. Anil Gupta',
@@ -72,7 +72,7 @@ export const mockAppointments: Omit<Appointment, '_id'>[] = [
         status: 'Scheduled'
     },
      { 
-        patientId: 'PAT002',
+        patientId: 'CA-94023',
         patientName: 'Jane Smith',
         doctorId: 'DOC02',
         doctorName: 'Dr. Priya Sharma',
