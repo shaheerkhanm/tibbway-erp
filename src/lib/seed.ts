@@ -1,4 +1,3 @@
-
 import 'dotenv/config'
 import mongoose from 'mongoose';
 import dbConnect from './db';
@@ -29,36 +28,51 @@ async function seedDatabase() {
         
         const hospitals = await HospitalModel.insertMany(mockHospitals);
         console.log(`${hospitals.length} hospitals inserted.`);
-        const hospitalMap = new Map(hospitals.map(h => [h.name, h._id]));
+        const hospitalMap = new Map(hospitals.map(h => [h.name, h._id.toString()]));
 
         const doctors = await DoctorModel.insertMany(mockDoctors.map(d => ({
             ...d,
-            hospital: hospitalMap.get(d.hospital)
+            hospital: d.hospital // Keep as name for lookup
         })));
         console.log(`${doctors.length} doctors inserted.`);
-        const doctorMap = new Map(doctors.map(d => [d.name, d._id]));
+        const doctorMap = new Map(doctors.map(d => [d.name, d._id.toString()]));
 
         const patients = await PatientModel.insertMany(mockPatients.map(p => ({
             ...p,
-            assignedHospital: hospitalMap.get(p.assignedHospital),
-            assignedDoctor: doctorMap.get(p.assignedDoctor),
         })));
         console.log(`${patients.length} patients inserted.`);
-        const patientMap = new Map(patients.map(p => [p.patientId, p._id]));
+        const patientMap = new Map(patients.map(p => [p.patientId, p._id.toString()]));
 
-        await InvoiceModel.insertMany(mockInvoices.map(i => ({
-            ...i,
-            patientId: patientMap.get(i.patientId)
-        })));
-        console.log(`${mockInvoices.length} invoices inserted.`);
+        await InvoiceModel.insertMany(mockInvoices.map(i => {
+            const pId = patientMap.get(i.patientId);
+            if (!pId) {
+                console.warn(`Could not find patient with ID: ${i.patientId} for invoice.`);
+                return null;
+            }
+            return {
+                ...i,
+                patientId: pId
+            }
+        }).filter(Boolean));
+        console.log(`${mockInvoices.length} invoices prepared to be inserted.`);
         
-        await AppointmentModel.insertMany(mockAppointments.map(a => ({
-            ...a,
-            patientId: patientMap.get(a.patientId),
-            doctorId: doctorMap.get(a.doctorName),
-            hospitalId: hospitalMap.get(a.hospitalName),
-        })));
-        console.log(`${mockAppointments.length} appointments inserted.`);
+        await AppointmentModel.insertMany(mockAppointments.map(a => {
+            const patientId = patientMap.get(a.patientId);
+            const doctorId = doctorMap.get(a.doctorName);
+            const hospitalId = hospitalMap.get(a.hospitalName);
+
+            if (!patientId || !doctorId || !hospitalId) {
+                 console.warn(`Skipping appointment for ${a.patientName} due to missing references.`);
+                 return null;
+            }
+            return {
+                ...a,
+                patientId,
+                doctorId,
+                hospitalId,
+            }
+        }).filter(Boolean));
+        console.log(`${mockAppointments.length} appointments prepared to be inserted.`);
         
         // In a real app, hash passwords before inserting
         await UserModel.insertMany(mockUsers.map(u => ({...u, password: 'password'})));
