@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { format, parseISO } from "date-fns"
 import { CalendarIcon, PlusCircle, Loader2 } from "lucide-react"
+import { getNames } from "country-list"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import type { Doctor, Hospital, Patient } from "@/lib/types"
 import { Skeleton } from "./ui/skeleton"
+import { ScrollArea } from "./ui/scroll-area"
 
 const patientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -58,6 +60,7 @@ export function PatientForm({ patientId }: PatientFormProps) {
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
   const [loading, setLoading] = React.useState(true);
   const isEditMode = !!patientId;
+  const countryNames = React.useMemo(() => getNames(), []);
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
@@ -195,18 +198,31 @@ export function PatientForm({ patientId }: PatientFormProps) {
             )}
             />
              <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Country</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. United States" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a country" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <ScrollArea className="h-72">
+                            {countryNames.map(country => (
+                                <SelectItem key={country} value={country}>
+                                {country}
+                                </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
             <FormField
             control={form.control}
             name="status"
