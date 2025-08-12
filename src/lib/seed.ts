@@ -26,19 +26,38 @@ async function seedDatabase() {
         console.log('Existing data cleared.');
 
         console.log('Inserting mock data...');
-        await PatientModel.insertMany(mockPatients);
-        console.log(`${mockPatients.length} patients inserted.`);
         
-        await HospitalModel.insertMany(mockHospitals);
-        console.log(`${mockHospitals.length} hospitals inserted.`);
-        
-        await DoctorModel.insertMany(mockDoctors);
-        console.log(`${mockDoctors.length} doctors inserted.`);
-        
-        await InvoiceModel.insertMany(mockInvoices);
+        const hospitals = await HospitalModel.insertMany(mockHospitals);
+        console.log(`${hospitals.length} hospitals inserted.`);
+        const hospitalMap = new Map(hospitals.map(h => [h.name, h._id]));
+
+        const doctors = await DoctorModel.insertMany(mockDoctors.map(d => ({
+            ...d,
+            hospital: hospitalMap.get(d.hospital)
+        })));
+        console.log(`${doctors.length} doctors inserted.`);
+        const doctorMap = new Map(doctors.map(d => [d.name, d._id]));
+
+        const patients = await PatientModel.insertMany(mockPatients.map(p => ({
+            ...p,
+            assignedHospital: hospitalMap.get(p.assignedHospital),
+            assignedDoctor: doctorMap.get(p.assignedDoctor),
+        })));
+        console.log(`${patients.length} patients inserted.`);
+        const patientMap = new Map(patients.map(p => [p.patientId, p._id]));
+
+        await InvoiceModel.insertMany(mockInvoices.map(i => ({
+            ...i,
+            patientId: patientMap.get(i.patientId)
+        })));
         console.log(`${mockInvoices.length} invoices inserted.`);
         
-        await AppointmentModel.insertMany(mockAppointments);
+        await AppointmentModel.insertMany(mockAppointments.map(a => ({
+            ...a,
+            patientId: patientMap.get(a.patientId),
+            doctorId: doctorMap.get(a.doctorName),
+            hospitalId: hospitalMap.get(a.hospitalName),
+        })));
         console.log(`${mockAppointments.length} appointments inserted.`);
         
         // In a real app, hash passwords before inserting
