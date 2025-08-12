@@ -1,3 +1,4 @@
+
 import type { Patient, Hospital, Doctor, Invoice, Appointment } from '@/lib/types';
 
 export const mockPatients: Patient[] = [
@@ -10,9 +11,10 @@ export const mockPatients: Patient[] = [
 ];
 
 export const mockHospitals: Hospital[] = [
-  { _id: 'H01', name: 'Global Health Center', location: 'New York, USA', contact: 'contact@ghc.com', specialties: ['Cardiology', 'Oncology'], imageUrl: 'https://placehold.co/600x400.png' },
-  { _id: 'H02', name: 'Unity Medical', location: 'Toronto, Canada', contact: 'info@unitymed.ca', specialties: ['Neurology', 'Orthopedics'], imageUrl: 'https://placehold.co/600x400.png' },
-  { _id: 'H03', name: 'Wellness Hospital', location: 'Dubai, UAE', contact: 'admin@wellnessdxb.ae', specialties: ['Pediatrics', 'General Surgery'], imageUrl: 'https://placehold.co/600x400.png' },
+  { _id: 'H01', name: 'Apollo Hospitals', country: 'India', location: 'Greams Lane, Off Greams Road, Chennai, Tamil Nadu 600006', contact: 'info@apollochennai.com', phone: '+91-44-2829-3333', contactPerson: 'Dr. Prathap C. Reddy', specialties: ['Cardiology', 'Oncology', 'Neurology', 'Pediatrics'], imageUrl: 'https://placehold.co/600x400.png', activePatients: 45, totalPatients: 234 },
+  { _id: 'H02', name: 'Fortis Healthcare', country: 'India', location: 'Sector 62, Phase - VIII, Mohali, Punjab 160062', contact: 'info@fortishealthcare.com', phone: '+91-172-496-7000', contactPerson: 'Dr. Ashok Seth', specialties: ['Cardiac Surgery', 'Gastroenterology', 'Urology', 'Orthopedics'], imageUrl: 'https://placehold.co/600x400.png', activePatients: 32, totalPatients: 187 },
+  { _id: 'H03', name: 'Max Healthcare', country: 'India', location: 'Press Enclave Road, Saket, New Delhi, Delhi 110017', contact: 'info@maxhealthcare.com', phone: '+91-11-2651-5050', contactPerson: 'Dr. Sandeep Budhiraja', specialties: ['Plastic Surgery', 'IVF', 'Radiology', 'Dermatology'], imageUrl: 'https://placehold.co/600x400.png', activePatients: 28, totalPatients: 156 },
+  { _id: 'H04', name: 'Manipal Hospitals', country: 'India', location: '98, HAL Old Airport Rd, Kodihalli, Bengaluru, Karnataka 560017', contact: 'info@manipalhospitals.com', phone: '+91-80-2502-5500', contactPerson: 'Dr. Sudarshan Ballal', specialties: ['Nephrology', 'Urology', 'Robotic Surgery'], imageUrl: 'https://placehold.co/600x400.png', activePatients: 52, totalPatients: 210 },
 ];
 
 export const mockDoctors: Doctor[] = [
@@ -55,3 +57,5 @@ export const mockAppointments: Appointment[] = [
         status: 'Scheduled'
     }
 ];
+
+    

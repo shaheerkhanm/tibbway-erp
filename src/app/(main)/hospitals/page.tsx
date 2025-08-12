@@ -1,16 +1,9 @@
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
-import { MoreHorizontal, PlusCircle } from "lucide-react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { MoreHorizontal, PlusCircle, Building2, MapPin, Phone, Mail, Edit, Search } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,12 +15,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Hospital, UserRole } from "@/lib/types"
-import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 
-// This is a placeholder for actual user role from a session
 const currentUserRole: UserRole = 'Super Admin';
+
+const MAX_SPECIALTIES_VISIBLE = 3;
 
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
@@ -54,9 +49,12 @@ export default function HospitalsPage() {
   }, [])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Hospitals</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Hospitals</h1>
+          <p className="text-muted-foreground">Manage partner hospitals and medical facilities</p>
+        </div>
         <Button asChild>
           <Link href="/hospitals/add">
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -64,101 +62,141 @@ export default function HospitalsPage() {
           </Link>
         </Button>
       </header>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
-                  <span className="sr-only">Image</span>
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Specialties</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                 Array.from({ length: 3 }).map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell className="hidden sm:table-cell">
-                            <Skeleton className="h-16 w-16 rounded-md" />
-                        </TableCell>
-                        <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                        <TableCell>
-                            <div className="flex gap-1">
-                                <Skeleton className="h-6 w-20 rounded-full" />
-                                <Skeleton className="h-6 w-20 rounded-full" />
+      
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search hospitals..." className="pl-10 w-full max-w-lg bg-background" />
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="flex flex-col">
+                    <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-4 w-1/2" />
+                         <Separator />
+                         <div className="space-y-2">
+                           <Skeleton className="h-4 w-1/4" />
+                           <div className="flex gap-2">
+                             <Skeleton className="h-6 w-16" />
+                             <Skeleton className="h-6 w-20" />
+                           </div>
+                         </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center">
+                        <Skeleton className="h-10 w-24" />
+                        <Skeleton className="h-10 w-32" />
+                    </CardFooter>
+                </Card>
+            ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {hospitals.map((hospital) => {
+            const visibleSpecialties = hospital.specialties.slice(0, MAX_SPECIALTIES_VISIBLE);
+            const hiddenSpecialtiesCount = hospital.specialties.length - MAX_SPECIALTIES_VISIBLE;
+
+            return (
+              <Card key={hospital._id} className="flex flex-col">
+                <CardHeader>
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+                                <Building2 className="size-6 text-primary" />
                             </div>
-                        </TableCell>
-                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
-                    </TableRow>
-                 ))
-              ) : (
-                hospitals.map((hospital) => (
-                  <TableRow key={hospital._id}>
-                    <TableCell className="hidden sm:table-cell">
-                      <Image
-                        alt={hospital.name}
-                        className="aspect-square rounded-md object-cover"
-                        height="64"
-                        src={hospital.imageUrl}
-                        width="64"
-                        data-ai-hint="hospital building"
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {hospital.name}
-                    </TableCell>
-                    <TableCell>{hospital.location}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {hospital.specialties.map((spec) => (
+                            <div>
+                                <h3 className="text-lg font-bold">{hospital.name}</h3>
+                                <p className="text-sm text-muted-foreground">{hospital.country || "India"}</p>
+                            </div>
+                        </div>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                                <Link href={`/hospitals/${hospital._id}/edit`}>Edit</Link>
+                            </DropdownMenuItem>
+                            {currentUserRole === 'Super Admin' && (
+                                <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">
+                                    Delete
+                                </DropdownMenuItem>
+                                </>
+                            )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-4">
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="size-4 mt-0.5 shrink-0" />
+                      <span>{hospital.location}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Phone className="size-4 shrink-0" />
+                      <span>{hospital.phone || "+91-11-2651-5050"}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Mail className="size-4 shrink-0" />
+                      <span>{hospital.contact}</span>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Contact Person</h4>
+                    <p className="text-sm text-muted-foreground">{hospital.contactPerson || "Dr. Sandeep Budhiraja"}</p>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                     <h4 className="font-semibold text-sm">Specialties</h4>
+                     <div className="flex flex-wrap gap-2">
+                        {visibleSpecialties.map((spec) => (
                           <Badge key={spec} variant="secondary">
                             {spec}
                           </Badge>
                         ))}
+                        {hiddenSpecialtiesCount > 0 && (
+                            <Badge variant="outline">+{hiddenSpecialtiesCount} more</Badge>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            aria-haspopup="true"
-                            size="icon"
-                            variant="ghost"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/hospitals/${hospital._id}/edit`}>Edit</Link>
-                          </DropdownMenuItem>
-                          {currentUserRole === 'Super Admin' && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive">
-                                Delete
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                   <Separator />
+                   <div className="flex justify-between text-center">
+                        <div>
+                            <p className="text-2xl font-bold">{hospital.activePatients || 0}</p>
+                            <p className="text-sm text-muted-foreground">Active</p>
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold">{hospital.totalPatients || 0}</p>
+                            <p className="text-sm text-muted-foreground">Total</p>
+                        </div>
+                   </div>
+                </CardContent>
+                <CardFooter className="bg-muted/40 p-4 border-t gap-2">
+                   <Button variant="outline" className="w-full" asChild>
+                      <Link href={`/hospitals/${hospital._id}/edit`}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit
+                      </Link>
+                    </Button>
+                    <Button className="w-full">View Details</Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
+
+    

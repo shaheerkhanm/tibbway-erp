@@ -17,9 +17,14 @@ export type Hospital = {
   _id: string;
   name: string;
   location: string;
-  contact: string;
+  country?: string;
+  contact: string; // email
+  phone?: string;
+  contactPerson?: string;
   specialties: string[];
   imageUrl: string;
+  activePatients?: number;
+  totalPatients?: number;
 };
 
 export type Doctor = {
@@ -63,3 +68,5 @@ export type User = {
   role: UserRole;
   avatar?: string;
 }
+
+    
