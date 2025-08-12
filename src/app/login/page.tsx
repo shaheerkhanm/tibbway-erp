@@ -18,7 +18,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       <div className="absolute top-8 left-8 flex items-center gap-2 text-lg font-semibold">
         <Stethoscope className="h-6 w-6 text-primary" />
-        <span>MediTour Admin</span>
+        <span>Tibbway Admin</span>
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1 text-center">

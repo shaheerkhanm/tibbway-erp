@@ -59,7 +59,7 @@ export default function MainLayout({
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Stethoscope className="size-6 text-primary" />
-            <h1 className="text-lg font-semibold">MediTour</h1>
+            <h1 className="text-lg font-semibold">Tibbway</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -93,7 +93,7 @@ export default function MainLayout({
                 <div className="flex flex-col items-start">
                   <span className="text-sm font-medium">Admin User</span>
                   <span className="text-xs text-muted-foreground">
-                    admin@meditour.com
+                    admin@tibbway.com
                   </span>
                 </div>
               </Button>
@@ -103,7 +103,7 @@ export default function MainLayout({
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">Admin</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    admin@meditour.com
+                    admin@tibbway.com
                   </p>
                 </div>
               </DropdownMenuLabel>
