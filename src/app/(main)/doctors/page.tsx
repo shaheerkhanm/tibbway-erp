@@ -48,6 +48,8 @@ export default function DoctorsPage() {
   const [loading, setLoading] = React.useState(true)
   const [doctorToDelete, setDoctorToDelete] = React.useState<Doctor | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedHospital, setSelectedHospital] = React.useState("all");
 
   const fetchDoctorsAndHospitals = React.useCallback(async () => {
       setLoading(true);
@@ -104,6 +106,19 @@ export default function DoctorsPage() {
     setDoctorToDelete(doctor);
     setIsAlertOpen(true);
   };
+  
+  const filteredDoctors = React.useMemo(() => {
+    return doctors
+      .filter(doctor => 
+        (doctor.name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (doctor.specialty?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (doctor.hospital?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (doctor.email?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
+      )
+      .filter(doctor => 
+        selectedHospital === 'all' || doctor.hospital === selectedHospital
+      );
+  }, [doctors, searchTerm, selectedHospital]);
 
   return (
     <>
@@ -124,9 +139,14 @@ export default function DoctorsPage() {
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search doctors..." className="pl-10 w-full max-w-lg bg-background" />
+            <Input 
+                placeholder="Search doctors by name, specialty, hospital..." 
+                className="pl-10 w-full max-w-lg bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
         </div>
-        <Select>
+        <Select value={selectedHospital} onValueChange={setSelectedHospital}>
             <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="All Hospitals" />
             </SelectTrigger>
@@ -156,7 +176,7 @@ export default function DoctorsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {doctors.map((doctor) => (
+          {filteredDoctors.map((doctor) => (
             <Card key={doctor._id} className="flex flex-col">
                 <CardHeader>
                     <div className="flex items-start justify-between">

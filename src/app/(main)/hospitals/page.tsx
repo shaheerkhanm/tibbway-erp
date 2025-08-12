@@ -41,6 +41,7 @@ export default function HospitalsPage() {
   const [loading, setLoading] = React.useState(true)
   const [hospitalToDelete, setHospitalToDelete] = React.useState<Hospital | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
 
 
   const fetchHospitals = React.useCallback(async () => {
@@ -98,6 +99,16 @@ export default function HospitalsPage() {
     setIsAlertOpen(true);
   };
 
+  const filteredHospitals = React.useMemo(() => {
+    return hospitals.filter(hospital =>
+      (hospital.name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (hospital.location?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (hospital.country?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      hospital.specialties.some(spec => spec.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [hospitals, searchTerm]);
+
+
   return (
     <>
     <div className="flex flex-col gap-6">
@@ -116,7 +127,12 @@ export default function HospitalsPage() {
       
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search hospitals..." className="pl-10 w-full max-w-lg bg-background" />
+        <Input 
+            placeholder="Search hospitals by name, location, or specialty..." 
+            className="pl-10 w-full max-w-lg bg-background"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {loading ? (
@@ -146,7 +162,7 @@ export default function HospitalsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {hospitals.map((hospital) => {
+          {filteredHospitals.map((hospital) => {
             const visibleSpecialties = hospital.specialties.slice(0, MAX_SPECIALTIES_VISIBLE);
             const hiddenSpecialtiesCount = hospital.specialties.length - MAX_SPECIALTIES_VISIBLE;
 

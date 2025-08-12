@@ -66,6 +66,7 @@ export default function PatientsPage() {
   const [loading, setLoading] = React.useState(true)
   const [patientToDelete, setPatientToDelete] = React.useState<Patient | null>(null);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   const fetchPatients = React.useCallback(async () => {
     setLoading(true);
@@ -120,6 +121,17 @@ export default function PatientsPage() {
     setIsAlertOpen(true);
   };
 
+  const filteredPatients = React.useMemo(() => {
+    return patients.filter(patient =>
+      (patient.name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (patient.email?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (patient.patientId?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (patient.country?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (patient.assignedHospital?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (patient.assignedDoctor?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
+    );
+  }, [patients, searchTerm]);
+
 
   return (
     <>
@@ -148,7 +160,12 @@ export default function PatientsPage() {
           <div className="py-4 flex items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search patients..." className="pl-10 bg-background" />
+              <Input
+                placeholder="Search patients..."
+                className="pl-10 bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -217,7 +234,7 @@ export default function PatientsPage() {
                         </TableRow>
                     ))
                 ) : (
-                    patients.map((patient) => (
+                    filteredPatients.map((patient) => (
                     <TableRow key={patient._id}>
                         <TableCell>
                             <div className="flex items-center gap-3">
