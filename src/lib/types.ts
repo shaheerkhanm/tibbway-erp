@@ -1,10 +1,12 @@
 
 export type Patient = {
   _id: string;
+  patientId?: string;
   name: string;
   email: string;
+  phone?: string;
   country: string;
-  status: 'Pending' | 'In Treatment' | 'Discharged' | 'Cancelled';
+  status: 'Pending' | 'In Treatment' | 'Discharged' | 'Cancelled' | 'Confirmed' | 'Lead';
   assignedHospital: string;
   assignedDoctor: string;
   treatmentDate: string;

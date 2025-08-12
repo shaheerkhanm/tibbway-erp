@@ -26,25 +26,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  Building,
-  CalendarPlus,
+  Bell,
   FileText,
   LayoutDashboard,
+  LineChart,
   LogOut,
+  Search,
   Settings,
+  Shield,
   Stethoscope,
   Users,
+  Building,
 } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
+import { Input } from "@/components/ui/input"
 
 const menuItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/patients", label: "Patients", icon: Users },
-  { href: "/appointments", label: "Appointments", icon: CalendarPlus },
   { href: "/hospitals", label: "Hospitals", icon: Building },
   { href: "/doctors", label: "Doctors", icon: Stethoscope },
   { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/reports", label: "Reports", icon: LineChart },
+  { href: "/audit-logs", label: "Audit Logs", icon: Shield },
+  { href: "/settings", label: "Users", icon: Settings },
 ]
 
 export default function MainLayout({
@@ -60,9 +65,12 @@ export default function MainLayout({
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center size-8 rounded-lg bg-primary text-primary-foreground">
-                <Stethoscope className="size-5" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-activity"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
-            <h1 className="text-lg font-semibold">Tibbway</h1>
+            <div className="flex flex-col">
+              <h1 className="text-lg font-semibold text-white">Tibbway</h1>
+              <p className="text-xs text-sidebar-foreground">Medical Tourism</p>
+            </div>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -91,12 +99,12 @@ export default function MainLayout({
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="https://placehold.co/100x100.png" alt="Admin" data-ai-hint="person face" />
-                  <AvatarFallback>AD</AvatarFallback>
+                  <AvatarFallback>DA</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium">Admin User</span>
+                  <span className="text-sm font-medium text-white">Demo Admin</span>
                   <span className="text-xs text-muted-foreground">
-                    admin@tibbway.com
+                    demo@tibbway.local
                   </span>
                 </div>
               </Button>
@@ -124,13 +132,24 @@ export default function MainLayout({
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
+        <header className="flex h-14 items-center justify-between gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
            <SidebarTrigger className="md:hidden"/>
-           <div className="flex-1">
-                {/* We can add a page title here dynamically */}
+           <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search patients, hospitals, doctors..." className="pl-10 w-full max-w-md bg-background" />
+           </div>
+           <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5"/>
+                <span className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              </Button>
+              {/* User menu can go here if needed, or rely on sidebar footer */}
            </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 bg-muted/40">{children}</main>
         <Toaster />
       </SidebarInset>
     </SidebarProvider>
