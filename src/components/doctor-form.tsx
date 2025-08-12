@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -5,12 +6,13 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { PlusCircle, Loader2, X, Star } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,12 +29,17 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import type { Doctor, Hospital } from "@/lib/types"
 import { Skeleton } from "./ui/skeleton"
+import { Badge } from "./ui/badge"
 
 const doctorFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
+  email: z.string().email("Please enter a valid email address."),
+  phone: z.string().min(1, "Phone number is required."),
   specialty: z.string().min(2, "Specialty is required."),
   hospital: z.string().min(1, "Hospital is required."),
-  contact: z.string().email("Please enter a valid email address."),
+  experience: z.coerce.number().min(0, "Experience must be a positive number."),
+  rating: z.coerce.number().min(0).max(5, "Rating must be between 0 and 5."),
+  availableSlots: z.array(z.string()).min(1, "At least one available slot is required."),
 })
 
 type DoctorFormValues = z.infer<typeof doctorFormSchema>
@@ -47,9 +54,20 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
   const [hospitals, setHospitals] = React.useState<Hospital[]>([])
   const [loading, setLoading] = React.useState(true);
   const isEditMode = !!doctorId;
+  const [slotInput, setSlotInput] = React.useState("");
 
   const form = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      specialty: "",
+      hospital: "",
+      experience: 0,
+      rating: 4.5,
+      availableSlots: [],
+    }
   })
 
   React.useEffect(() => {
@@ -77,6 +95,28 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
     fetchData();
   }, [doctorId, isEditMode, form, toast])
 
+  const handleSlotAdd = () => {
+    if (slotInput.trim().match(/^\d{2}:\d{2}-\d{2}:\d{2}$/)) {
+        const currentSlots = form.getValues("availableSlots");
+        if (!currentSlots.includes(slotInput.trim())) {
+            form.setValue("availableSlots", [...currentSlots, slotInput.trim()]);
+            setSlotInput("");
+        }
+    } else {
+        toast({
+            title: "Invalid Slot Format",
+            description: "Please use HH:mm-HH:mm format (e.g., 09:00-12:00).",
+            variant: "destructive"
+        })
+    }
+  };
+
+  const handleSlotRemove = (slotToRemove: string) => {
+    const currentSlots = form.getValues("availableSlots");
+    form.setValue("availableSlots", currentSlots.filter(slot => slot !== slotToRemove));
+  }
+
+
   async function onSubmit(data: DoctorFormValues) {
     const apiEndpoint = isEditMode ? `/api/doctors/${doctorId}` : '/api/doctors';
     const method = isEditMode ? 'PUT' : 'POST';
@@ -87,6 +127,9 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
+          // These are just mock values for now
+          activePatients: isEditMode ? form.getValues('activePatients') : Math.floor(Math.random() * 20),
+          totalPatients: isEditMode ? form.getValues('totalPatients') : Math.floor(Math.random() * 200) + 50,
           imageUrl: `https://placehold.co/100x100.png?text=${data.name.charAt(0)}`
         }),
       });
@@ -116,6 +159,10 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-20 w-full" />
             </div>
             <Skeleton className="h-10 w-32" />
         </div>
@@ -141,12 +188,25 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
           />
           <FormField
             control={form.control}
-            name="contact"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input placeholder="doctor@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input placeholder="+91-98765-43210" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -189,6 +249,72 @@ export function DoctorForm({ doctorId }: DoctorFormProps) {
               </FormItem>
             )}
           />
+           <FormField
+            control={form.control}
+            name="experience"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Experience (Years)</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="15" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="rating"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rating</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.1" placeholder="4.8" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="md:col-span-2">
+            <FormField
+                control={form.control}
+                name="availableSlots"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Available Slots</FormLabel>
+                        <div className="flex gap-2">
+                            <Input 
+                                value={slotInput}
+                                onChange={(e) => setSlotInput(e.target.value)}
+                                placeholder="e.g. 09:00-12:00"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleSlotAdd();
+                                    }
+                                }}
+                            />
+                            <Button type="button" variant="outline" onClick={handleSlotAdd}>Add Slot</Button>
+                        </div>
+                        <FormDescription>
+                            Type a time slot in HH:mm-HH:mm format and press Enter or click Add.
+                        </FormDescription>
+                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem]">
+                            {field.value.map(slot => (
+                                <Badge key={slot} variant="secondary">
+                                    {slot}
+                                    <button type="button" className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5" onClick={() => handleSlotRemove(slot)}>
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
         </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>

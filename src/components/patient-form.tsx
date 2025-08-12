@@ -38,6 +38,7 @@ import { ScrollArea } from "./ui/scroll-area"
 const patientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
+  phone: z.string().optional(),
   country: z.string().min(2, "Country is required."),
   status: z.enum(['Pending', 'In Treatment', 'Discharged', 'Cancelled', 'Confirmed', 'Lead']),
   assignedDoctor: z.string().min(1, "Doctor is required."),
@@ -98,9 +99,16 @@ export function PatientForm({ patientId }: PatientFormProps) {
             if (isEditMode) {
                 const patientRes = await fetch(`/api/patients/${patientId}`);
                 const patientData: Patient = await patientRes.json();
+                
+                // Find hospital and doctor IDs from their names
+                const hospitalId = hospitalsData.find((h: Hospital) => h.name === patientData.assignedHospital)?._id;
+                const doctorId = doctorsData.find((d: Doctor) => d.name === patientData.assignedDoctor)?._id;
+                
                 form.reset({
                     ...patientData,
                     treatmentDate: parseISO(patientData.treatmentDate),
+                    assignedHospital: hospitalId,
+                    assignedDoctor: doctorId,
                 });
             }
         } catch (error) {
@@ -122,7 +130,6 @@ export function PatientForm({ patientId }: PatientFormProps) {
     const apiEndpoint = isEditMode ? `/api/patients/${patientId}` : '/api/patients';
     const method = isEditMode ? 'PUT' : 'POST';
 
-    // Find the full doctor and hospital objects
     const doctorName = doctors.find(d => d._id === data.assignedDoctor)?.name;
     const hospitalName = hospitals.find(h => h._id === data.assignedHospital)?.name;
 
@@ -137,7 +144,6 @@ export function PatientForm({ patientId }: PatientFormProps) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 ...data,
-                // Send the full name, not the ID, to match the existing model logic
                 assignedDoctor: doctorName, 
                 assignedHospital: hospitalName,
                 treatmentDate: format(data.treatmentDate, "yyyy-MM-dd"),
@@ -173,6 +179,7 @@ export function PatientForm({ patientId }: PatientFormProps) {
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
+                 <Skeleton className="h-10 w-full" />
             </div>
             <Skeleton className="h-10 w-36" />
         </div>
@@ -204,6 +211,19 @@ export function PatientForm({ patientId }: PatientFormProps) {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                     <Input placeholder="patient@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                    <Input placeholder="+1-555-0123" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>

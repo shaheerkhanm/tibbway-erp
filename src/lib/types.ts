@@ -32,7 +32,13 @@ export type Doctor = {
   name: string;
   specialty: string;
   hospital: string;
-  contact: string;
+  email: string;
+  phone: string;
+  experience: number; // in years
+  availableSlots: string[];
+  activePatients: number;
+  totalPatients: number;
+  rating: number;
   imageUrl: string;
 };
 

@@ -18,9 +18,10 @@ export const mockHospitals: Hospital[] = [
 ];
 
 export const mockDoctors: Doctor[] = [
-  { _id: 'D001', name: 'Dr. Emily Carter', specialty: 'Cardiology', hospital: 'Global Health Center', contact: 'e.carter@ghc.com', imageUrl: 'https://placehold.co/100x100.png' },
-  { _id: 'D002', name: 'Dr. Ben Hanson', specialty: 'Neurology', hospital: 'Unity Medical', contact: 'b.hanson@unitymed.ca', imageUrl: 'https://placehold.co/100x100.png' },
-  { _id: 'D003', name: 'Dr. Aisha Khan', specialty: 'Pediatrics', hospital: 'Wellness Hospital', contact: 'a.khan@wellnessdxb.ae', imageUrl: 'https://placehold.co/100x100.png' },
+  { _id: 'D001', name: 'Dr. Rajesh Kumar', specialty: 'Cardiothoracic Surgery', hospital: 'Apollo Hospitals', email: 'rajesh.kumar@apollo.com', phone: '+91-98765-43210', experience: 15, availableSlots: ['09:00-12:00', '14:00-17:00'], activePatients: 12, totalPatients: 145, rating: 4.8, imageUrl: 'https://placehold.co/100x100.png' },
+  { _id: 'D002', name: 'Dr. Priya Sharma', specialty: 'Orthopedic Surgery', hospital: 'Fortis Healthcare', email: 'priya.sharma@fortis.com', phone: '+91-98765-43211', experience: 12, availableSlots: ['10:00-13:00', '15:00-18:00'], activePatients: 8, totalPatients: 98, rating: 4.9, imageUrl: 'https://placehold.co/100x100.png' },
+  { _id: 'D003', name: 'Dr. Anil Gupta', specialty: 'Plastic & Cosmetic Surgery', hospital: 'Max Healthcare', email: 'anil.gupta@max.com', phone: '+91-98765-43212', experience: 18, availableSlots: ['08:00-11:00', '16:00-19:00'], activePatients: 15, totalPatients: 203, rating: 4.7, imageUrl: 'https://placehold.co/100x100.png' },
+  { _id: 'D004', name: 'Dr. Sunita Patel', specialty: 'Nephrology', hospital: 'Manipal Hospitals', email: 'sunita.patel@manipal.com', phone: '+91-98765-43213', experience: 10, availableSlots: ['09:30-12:30'], activePatients: 10, totalPatients: 112, rating: 4.8, imageUrl: 'https://placehold.co/100x100.png' },
 ];
 
 export const mockInvoices: Invoice[] = [

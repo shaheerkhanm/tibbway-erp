@@ -13,7 +13,7 @@ const PatientSchema = new Schema<IPatient>({
   assignedHospital: { type: String, required: true },
   assignedDoctor: { type: String, required: true },
   treatmentDate: { type: String, required: true },
-  avatar: { type: String, required: true },
+  avatar: { type: String },
   patientId: { type: String },
 });
 

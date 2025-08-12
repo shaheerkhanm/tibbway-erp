@@ -8,7 +8,13 @@ const DoctorSchema = new Schema<IDoctor>({
   name: { type: String, required: true },
   specialty: { type: String, required: true },
   hospital: { type: String, required: true },
-  contact: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  experience: { type: Number, required: true },
+  availableSlots: [{ type: String }],
+  activePatients: { type: Number, required: true },
+  totalPatients: { type: Number, required: true },
+  rating: { type: Number, required: true },
   imageUrl: { type: String, required: true },
 });
 
