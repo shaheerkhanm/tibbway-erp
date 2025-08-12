@@ -76,7 +76,8 @@ export default function MainLayout({
       <Sidebar>
         <SidebarHeader>
           <Link href="/" className="flex items-center gap-2">
-            <Image src="https://placehold.co/140x40.png" alt="Tibbway Logo" width={140} height={40} />
+            <Stethoscope className="size-8 text-primary" />
+            <h1 className="text-xl font-bold">Tibbway</h1>
           </Link>
         </SidebarHeader>
         <SidebarContent>
