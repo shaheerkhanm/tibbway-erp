@@ -8,7 +8,7 @@ import DoctorModel from './models/doctor.model';
 import InvoiceModel from './models/invoice.model';
 import AppointmentModel from './models/appointment.model';
 import UserModel from './models/user.model';
-import { mockPatients, mockHospitals, mockDoctors, mockInvoices, mockAppointments } from './mock-data';
+import { mockPatients, mockHospitals, mockDoctors, mockInvoices, mockAppointments, mockUsers } from './mock-data';
 
 async function seedDatabase() {
     console.log('Starting database seed...');
@@ -41,16 +41,9 @@ async function seedDatabase() {
         await AppointmentModel.insertMany(mockAppointments);
         console.log(`${mockAppointments.length} appointments inserted.`);
         
-        const superAdmin = {
-            name: 'Super Admin',
-            email: 'admin@tibbway.com',
-            // In a real app, use bcrypt to hash passwords
-            password: 'password', 
-            role: 'Super Admin',
-            avatar: 'https://placehold.co/100x100.png'
-        };
-        await UserModel.create(superAdmin);
-        console.log('Super Admin user created.');
+        // In a real app, hash passwords before inserting
+        await UserModel.insertMany(mockUsers.map(u => ({...u, password: 'password'})));
+        console.log(`${mockUsers.length} users inserted.`);
 
         console.log('Database seeded successfully!');
     } catch (error) {
