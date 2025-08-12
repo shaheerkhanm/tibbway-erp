@@ -214,7 +214,7 @@ export default function DoctorsPage() {
                     <div className="text-sm space-y-2">
                         <p className="font-semibold">Available Slots</p>
                         <div className="flex flex-wrap gap-2">
-                            {doctor.availableSlots.map(slot => (
+                            {doctor.availableSlots && doctor.availableSlots.map(slot => (
                                 <Badge key={slot} variant="outline">{slot}</Badge>
                             ))}
                         </div>
