@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-let MONGODB_URI = "mongodb+srv://shaheer9x:5MVchuNTmFk4oko6@cluster0.k6iw7y9.mongodb.net/Test?retryWrites=true&w=majority&appName=Cluster0/test1";
+// let MONGODB_URI = "mongodb+srv://shaheer9x:5MVchuNTmFk4oko6@cluster0.k6iw7y9.mongodb.net/Test?retryWrites=true&w=majority&appName=Cluster0/test1";
+let MONGODB_URI = process.env.MONGODB_URI;
+
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
