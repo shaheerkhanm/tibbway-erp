@@ -33,6 +33,11 @@ export async function POST(request: Request) {
   try {
     await connectDB();
     const body = await request.json();
+
+    if (!body.imageUrl) {
+        body.imageUrl = `https://placehold.co/600x400.png`;
+    }
+
     const hospital = await HospitalModel.create(body);
     return NextResponse.json(hospital, { status: 201 });
   } catch (error: any) {

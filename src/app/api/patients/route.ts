@@ -35,6 +35,11 @@ export async function POST(request: Request) {
   try {
     await connectDB();
     const body = await request.json();
+
+    if (!body.avatar) {
+        body.avatar = `https://placehold.co/100x100.png?text=${body.name.charAt(0)}`;
+    }
+
     const patient = await PatientModel.create(body);
     return NextResponse.json(patient, { status: 201 });
   } catch (error) {

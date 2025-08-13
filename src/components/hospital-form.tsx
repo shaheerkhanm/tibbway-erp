@@ -2,11 +2,12 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { PlusCircle, Loader2, X } from "lucide-react"
+import { PlusCircle, Loader2, X, Upload } from "lucide-react"
 import { getNames } from "country-list"
 
 import { Button } from "@/components/ui/button"
@@ -35,6 +36,7 @@ const hospitalFormSchema = z.object({
   phone: z.string().optional(),
   contactPerson: z.string().optional(),
   specialties: z.array(z.string()).min(1, "At least one specialty is required."),
+  imageUrl: z.string().optional(),
 })
 
 type HospitalFormValues = z.infer<typeof hospitalFormSchema>
@@ -50,6 +52,8 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
   const isEditMode = !!hospitalId;
   const [specialtyInput, setSpecialtyInput] = React.useState("");
   const countryNames = React.useMemo(() => getNames(), []);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 
   const form = useForm<HospitalFormValues>({
@@ -61,7 +65,8 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
         contact: "",
         phone: "",
         contactPerson: "",
-        specialties: []
+        specialties: [],
+        imageUrl: ""
     }
   })
 
@@ -72,6 +77,9 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
           const res = await fetch(`/api/hospitals/${hospitalId}`);
           const hospitalData: Hospital = await res.json();
           form.reset(hospitalData);
+          if (hospitalData.imageUrl) {
+            setImagePreview(hospitalData.imageUrl);
+          }
         } catch (error) {
           console.error("Failed to fetch hospital data", error);
           toast({
@@ -100,9 +108,50 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
     const currentSpecialties = form.getValues("specialties");
     form.setValue("specialties", currentSpecialties.filter(spec => spec !== specToRemove));
   }
+  
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   async function onSubmit(data: HospitalFormValues) {
+    let imageUrl = data.imageUrl || `https://placehold.co/600x400.png`;
+
+    const file = fileInputRef.current?.files?.[0];
+    if (file) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", "hospitals");
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image');
+        }
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Image Upload Error",
+          description: "Could not upload the image. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     const apiEndpoint = isEditMode ? `/api/hospitals/${hospitalId}` : '/api/hospitals';
     const method = isEditMode ? 'PUT' : 'POST';
 
@@ -112,7 +161,7 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          imageUrl: `https://placehold.co/600x400.png`
+          imageUrl,
         }),
       });
 
@@ -170,99 +219,130 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hospital Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Global Health Center" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address / Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. 123 Health St, Medical City" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="md:col-span-2">
+                    <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Hospital Name</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g. Global Health Center" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                    />
+                </div>
+                <div className="md:col-span-2">
+                    <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Address / Location</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g. 123 Health St, Medical City" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                    />
+                </div>
+                <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a country" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        <ScrollArea className="h-72">
+                            {countryNames.map(country => (
+                                <SelectItem key={country} value={country}>
+                                {country}
+                                </SelectItem>
+                            ))}
+                        </ScrollArea>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
                 <FormItem>
-                <FormLabel>Country</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select a country" />
-                    </SelectTrigger>
+                    <Input placeholder="+1-555-123-4567" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <ScrollArea className="h-72">
-                        {countryNames.map(country => (
-                            <SelectItem key={country} value={country}>
-                            {country}
-                            </SelectItem>
-                        ))}
-                      </ScrollArea>
-                    </SelectContent>
-                </Select>
-                <FormMessage />
+                    <FormMessage />
                 </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="+1-555-123-4567" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="contact"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="contact@hospital.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="contactPerson"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Person</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Dr. Jane Smith" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="md:col-span-2">
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="contact"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Contact Email</FormLabel>
+                    <FormControl>
+                    <Input placeholder="contact@hospital.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="contactPerson"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Contact Person</FormLabel>
+                    <FormControl>
+                    <Input placeholder="e.g. Dr. Jane Smith" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+                />
+            </div>
+            <div className="space-y-2">
+                <FormLabel>Hospital Image</FormLabel>
+                 <div 
+                    className="relative flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                   {imagePreview ? (
+                      <Image src={imagePreview} alt="Hospital preview" layout="fill" objectFit="cover" className="rounded-lg" />
+                   ) : (
+                      <div className="text-center text-muted-foreground">
+                        <Upload className="mx-auto h-8 w-8" />
+                        <p>Click to upload image</p>
+                      </div>
+                   )}
+                   <Input 
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      className="hidden"
+                      accept="image/*"
+                    />
+                 </div>
+            </div>
+        </div>
+
+        <div className="md:col-span-2">
             <FormField
                 control={form.control}
                 name="specialties"
@@ -301,7 +381,6 @@ export function HospitalForm({ hospitalId }: HospitalFormProps) {
                 )}
                 />
             </div>
-        </div>
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? (
