@@ -56,6 +56,37 @@ const menuItems = [
   { href: "/settings", label: "Users", icon: Settings },
 ]
 
+function Logo() {
+  const [logoUrl, setLogoUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchLogo = () => {
+      const storedLogo = localStorage.getItem("app-logo");
+      setLogoUrl(storedLogo);
+    };
+
+    fetchLogo();
+
+    // Listen for storage changes to update logo in real-time
+    window.addEventListener('storage', fetchLogo);
+    return () => {
+      window.removeEventListener('storage', fetchLogo);
+    };
+  }, []);
+
+  return (
+    <Link href="/" className="flex items-center gap-2">
+      {logoUrl ? (
+        <Image src={logoUrl} alt="Tibbway" width={32} height={32} className="size-8" />
+      ) : (
+        <Stethoscope className="size-8 text-primary" />
+      )}
+      <h1 className="text-xl font-bold">Tibbway</h1>
+    </Link>
+  );
+}
+
+
 export default function MainLayout({
   children,
 }: {
@@ -80,10 +111,7 @@ export default function MainLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <Link href="/" className="flex items-center gap-2">
-            <Stethoscope className="size-8 text-primary" />
-            <h1 className="text-xl font-bold">Tibbway</h1>
-          </Link>
+          <Logo />
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
@@ -173,3 +201,5 @@ export default function MainLayout({
     </SidebarProvider>
   )
 }
+
+    
