@@ -77,11 +77,11 @@ function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2">
       {logoUrl ? (
-        <Image src={logoUrl} alt="Tibbway" width={32} height={32} className="size-8" />
+        <Image src={logoUrl||"public/logo.png"} alt="Tibbway" width={100} height={100} className="size-8 w-full h-16" />
       ) : (
         <Stethoscope className="size-8 text-primary" />
       )}
-      <h1 className="text-xl font-bold">Tibbway</h1>
+      {/* <h1 className="text-xl font-bold">Tibbway</h1> */}
     </Link>
   );
 }
